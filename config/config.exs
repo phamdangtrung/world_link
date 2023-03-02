@@ -47,6 +47,26 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Ueberauth configs
+config :ueberauth, Ueberauth,
+  providers: [
+    discord:
+      {Ueberauth.Strategy.Discord,
+       [
+         default_scope: "identify connections email guilds",
+         prompt: "none"
+       ]}
+  ]
+
+# Strategy provider configuration
+# config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
+#   client_id: System.get_env("DISCORD_CLIENT_ID"),
+#   client_secret: System.get_env("DISCORD_CLIENT_SECRET")
+
+config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
+  client_id: "1080413348081958922",
+  client_secret: "384DtQlPrie0fjvLy6jpk73Opm34bHI3"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

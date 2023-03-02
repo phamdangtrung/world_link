@@ -8,6 +8,7 @@ defmodule WorldLinkWeb.Router do
     plug :put_root_layout, {WorldLinkWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug WorldLinkWeb.Locale, "en"
   end
 
   pipeline :api do
@@ -18,6 +19,13 @@ defmodule WorldLinkWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+  end
+
+  scope "/auth", WorldLinkWeb do
+    pipe_through :browser
+
+    get "/:provider", AuthController, :request
+    get "/:provider/callback", AuthController, :callback
   end
 
   # Other scopes may use custom stacks.

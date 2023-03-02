@@ -53,7 +53,8 @@ defmodule WorldLink.MixProject do
       {:ecto_psql_extras, "~> 0.6"},
       {:ueberauth, "~> 0.7"},
       {:ueberauth_discord, "~> 0.6"},
-      {:argon2_elixir, "~> 3.0"}
+      {:argon2_elixir, "~> 3.0"},
+      {:uuid, "~> 1.1" }
     ]
   end
 

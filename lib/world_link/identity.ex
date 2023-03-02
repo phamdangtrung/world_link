@@ -51,7 +51,7 @@ defmodule WorldLink.Identity do
   """
   def create_user(attrs \\ %{}) do
     %User{}
-    |> User.changeset(attrs)
+    |> User.oauth_registration_changeset(attrs)
     |> Repo.insert()
   end
 

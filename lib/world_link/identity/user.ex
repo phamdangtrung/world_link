@@ -12,61 +12,27 @@ defmodule WorldLink.Identity.User do
     field :name, :string
     field :provider_uid, :string
     field :uuid, :string
-    field :oauth_provider, :string
+    field :oauth_provider, Ecto.Enum, values: [:discord, :facebook, :twitter, :google]
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
 
     timestamps()
   end
 
-  @doc false
-  def changeset(user, attrs) do
-    user
-    |> cast(attrs, [
-      :name,
-      :email,
-      :handle,
-      :twitter_handle,
-      :discord_handle,
-      :facebook_handle,
-      :google_handle,
-      :auth_token,
-      :auth_token_expires_at,
-      :joined_at,
-      :signed_in_at,
-      :approved,
-      :activated,
-      :activated_at
-    ])
-    |> validate_required([
-      :name,
-      :email,
-      :handle,
-      :twitter_handle,
-      :discord_handle,
-      :facebook_handle,
-      :google_handle,
-      :auth_token,
-      :auth_token_expires_at,
-      :joined_at,
-      :signed_in_at,
-      :approved,
-      :activated,
-      :activated_at
-    ])
-  end
-
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [])
+    |> cast(attrs, [:name, :email, :password])
     |> validate_email()
     |> validate_password()
+    |> assign_uuid()
   end
 
   def oauth_registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:name, :email])
+    |> cast(attrs, [:name, :email, :provider_uid, :oauth_provider])
     |> validate_email()
+    |> validate_provider_uid()
+    |> assign_uuid()
   end
 
   defp validate_email(changeset) do
@@ -103,5 +69,18 @@ defmodule WorldLink.Identity.User do
 
     changeset
     |> put_change(:email, String.downcase(email))
+  end
+
+  defp assign_uuid(changeset) when changeset.valid? == true do
+    changeset
+    |> put_change(:uuid, UUID.uuid1(:hex))
+  end
+
+  defp assign_uuid(changeset), do: changeset
+
+  defp validate_provider_uid(changeset) do
+    changeset
+    |> unsafe_validate_unique([:provider_uid, :oauth_provider], WorldLink.Repo)
+    |> unique_constraint([:provider_uid, :oauth_provider])
   end
 end

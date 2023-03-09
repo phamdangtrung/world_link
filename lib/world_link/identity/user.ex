@@ -1,6 +1,10 @@
 defmodule WorldLink.Identity.User do
+  @moduledoc false
+
   use Ecto.Schema
   import Ecto.Changeset
+
+  alias WorldLink.Identity.User
 
   schema "users" do
     field :activated, :boolean, default: false
@@ -82,5 +86,22 @@ defmodule WorldLink.Identity.User do
     changeset
     |> unsafe_validate_unique([:provider_uid, :oauth_provider], WorldLink.Repo)
     |> unique_constraint([:provider_uid, :oauth_provider])
+  end
+
+  def valid_password?(%User{hashed_password: hashed_password}, password)
+      when is_binary(hashed_password) and byte_size(password) > 0 do
+    Argon2.verify_pass(password, hashed_password)
+  end
+
+  def valid_password?(_, _) do
+    Argon2.no_user_verify()
+    false
+  end
+
+  def confirm_changeset(user) do
+    now = DateTime.utc_now()
+    |> DateTime.truncate(:second)
+
+    change(user, [activated_at: now, activated: true])
   end
 end

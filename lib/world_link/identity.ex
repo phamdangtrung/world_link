@@ -51,6 +51,12 @@ defmodule WorldLink.Identity do
   """
   def create_user(attrs \\ %{}) do
     %User{}
+    |> User.registration_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def create_oauth_user(attrs \\ %{}) do
+    %User{}
     |> User.oauth_registration_changeset(attrs)
     |> Repo.insert()
   end
@@ -67,11 +73,11 @@ defmodule WorldLink.Identity do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_user(%User{} = user, attrs) do
-    user
-    |> User.changeset(attrs)
-    |> Repo.update()
-  end
+  # def update_user(%User{} = user, attrs) do
+  #   user
+  #   |> User.changeset(attrs)
+  #   |> Repo.update()
+  # end
 
   @doc """
   Deletes a user.
@@ -98,7 +104,43 @@ defmodule WorldLink.Identity do
       %Ecto.Changeset{data: %User{}}
 
   """
-  def change_user(%User{} = user, attrs \\ %{}) do
-    User.changeset(user, attrs)
+  # def change_user(%User{} = user, attrs \\ %{}) do
+  #   User.changeset(user, attrs)
+  # end
+
+  ## Database getters
+
+  @doc """
+  Gets a user by email.
+
+  ## Examples
+
+      iex> get_user_by_email("foo@example.com")
+      %User{}
+
+      iex> get_user_by_email("unknown@example.com")
+      nil
+
+  """
+  def get_user_by_email(email) when is_binary(email) do
+    Repo.get_by(User, email: email)
+  end
+
+  @doc """
+  Gets a user by email and password.
+
+  ## Examples
+
+      iex> get_user_by_email_and_password("foo@example.com", "correct_password")
+      %User{}
+
+      iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
+      nil
+
+  """
+  def get_user_by_email_and_password(email, password)
+      when is_binary(email) and is_binary(password) do
+    user = Repo.get_by(User, email: email)
+    if User.valid_password?(user, password), do: user
   end
 end

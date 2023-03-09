@@ -8,7 +8,22 @@ defmodule WorldLink.IdentityTest do
 
     import WorldLink.IdentityFixtures
 
-    @invalid_attrs %{activated: nil, activated_at: nil, approved: nil, auth_token: nil, auth_token_expires_at: nil, discord_handle: nil, email: nil, facebook_handle: nil, google_handle: nil, handle: nil, joined_at: nil, name: nil, signed_in_at: nil, twitter_handle: nil}
+    @invalid_attrs %{
+      activated: nil,
+      activated_at: nil,
+      approved: nil,
+      auth_token: nil,
+      auth_token_expires_at: nil,
+      discord_handle: nil,
+      email: nil,
+      facebook_handle: nil,
+      google_handle: nil,
+      handle: nil,
+      joined_at: nil,
+      name: nil,
+      signed_in_at: nil,
+      twitter_handle: nil
+    }
 
     test "list_users/0 returns all users" do
       user = user_fixture()
@@ -21,7 +36,22 @@ defmodule WorldLink.IdentityTest do
     end
 
     test "create_user/1 with valid data creates a user" do
-      valid_attrs = %{activated: true, activated_at: ~U[2023-02-28 09:51:00Z], approved: true, auth_token: "some auth_token", auth_token_expires_at: ~U[2023-02-28 09:51:00Z], discord_handle: "some discord_handle", email: "some email", facebook_handle: "some facebook_handle", google_handle: "some google_handle", handle: "some handle", joined_at: ~U[2023-02-28 09:51:00Z], name: "some name", signed_in_at: ~U[2023-02-28 09:51:00Z], twitter_handle: "some twitter_handle"}
+      valid_attrs = %{
+        activated: true,
+        activated_at: ~U[2023-02-28 09:51:00Z],
+        approved: true,
+        auth_token: "some auth_token",
+        auth_token_expires_at: ~U[2023-02-28 09:51:00Z],
+        discord_handle: "some discord_handle",
+        email: "some email",
+        facebook_handle: "some facebook_handle",
+        google_handle: "some google_handle",
+        handle: "some handle",
+        joined_at: ~U[2023-02-28 09:51:00Z],
+        name: "some name",
+        signed_in_at: ~U[2023-02-28 09:51:00Z],
+        twitter_handle: "some twitter_handle"
+      }
 
       assert {:ok, %User{} = user} = Identity.create_user(valid_attrs)
       assert user.activated == true
@@ -46,7 +76,23 @@ defmodule WorldLink.IdentityTest do
 
     test "update_user/2 with valid data updates the user" do
       user = user_fixture()
-      update_attrs = %{activated: false, activated_at: ~U[2023-03-01 09:51:00Z], approved: false, auth_token: "some updated auth_token", auth_token_expires_at: ~U[2023-03-01 09:51:00Z], discord_handle: "some updated discord_handle", email: "some updated email", facebook_handle: "some updated facebook_handle", google_handle: "some updated google_handle", handle: "some updated handle", joined_at: ~U[2023-03-01 09:51:00Z], name: "some updated name", signed_in_at: ~U[2023-03-01 09:51:00Z], twitter_handle: "some updated twitter_handle"}
+
+      update_attrs = %{
+        activated: false,
+        activated_at: ~U[2023-03-01 09:51:00Z],
+        approved: false,
+        auth_token: "some updated auth_token",
+        auth_token_expires_at: ~U[2023-03-01 09:51:00Z],
+        discord_handle: "some updated discord_handle",
+        email: "some updated email",
+        facebook_handle: "some updated facebook_handle",
+        google_handle: "some updated google_handle",
+        handle: "some updated handle",
+        joined_at: ~U[2023-03-01 09:51:00Z],
+        name: "some updated name",
+        signed_in_at: ~U[2023-03-01 09:51:00Z],
+        twitter_handle: "some updated twitter_handle"
+      }
 
       assert {:ok, %User{} = user} = Identity.update_user(user, update_attrs)
       assert user.activated == false

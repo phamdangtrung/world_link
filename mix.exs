@@ -54,7 +54,7 @@ defmodule WorldLink.MixProject do
       {:ueberauth, "~> 0.7"},
       {:ueberauth_discord, "~> 0.6"},
       {:argon2_elixir, "~> 3.0"},
-      {:uuid, "~> 1.1" },
+      {:uuid, "~> 1.1"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
     ]
   end

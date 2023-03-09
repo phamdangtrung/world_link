@@ -11,20 +11,19 @@ defmodule WorldLink.IdentityFixtures do
     {:ok, user} =
       attrs
       |> Enum.into(%{
+        id: 1,
         activated: true,
-        activated_at: ~U[2023-02-28 09:51:00Z],
+        activated_at: ~U[2023-02-28 09:51:00Z] |> DateTime.truncate(:second),
         approved: true,
         auth_token: "some auth_token",
         auth_token_expires_at: ~U[2023-02-28 09:51:00Z],
-        discord_handle: "some discord_handle",
-        email: "some email",
-        facebook_handle: "some facebook_handle",
-        google_handle: "some google_handle",
+        email: "sam@doe.com",
         handle: "some handle",
-        joined_at: ~U[2023-02-28 09:51:00Z],
         name: "some name",
-        signed_in_at: ~U[2023-02-28 09:51:00Z],
-        twitter_handle: "some twitter_handle"
+        uuid: "uuid",
+        oauth_provider: "google",
+        provider_uuid: "provider-uuid",
+        password: "somepassword"
       })
       |> WorldLink.Identity.create_user()
 

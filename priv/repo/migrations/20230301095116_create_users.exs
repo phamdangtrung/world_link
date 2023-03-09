@@ -19,6 +19,7 @@ defmodule WorldLink.Repo.Migrations.CreateUsers do
     end
 
     create unique_index(:users, [:email])
+    create unique_index(:users, [:uuid])
     create unique_index(:users, [:provider_uid, :oauth_provider])
   end
 end

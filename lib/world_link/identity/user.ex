@@ -99,9 +99,10 @@ defmodule WorldLink.Identity.User do
   end
 
   def confirm_changeset(user) do
-    now = DateTime.utc_now()
-    |> DateTime.truncate(:second)
+    now =
+      DateTime.utc_now()
+      |> DateTime.truncate(:second)
 
-    change(user, [activated_at: now, activated: true])
+    change(user, activated_at: now, activated: true)
   end
 end

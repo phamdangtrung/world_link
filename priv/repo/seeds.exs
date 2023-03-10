@@ -9,3 +9,11 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+for _ <- 1..20  do
+  WorldLink.Repo.insert!(%WorldLink.Identity.User{
+    name: Faker.Person.name(),
+    email: Faker.Internet.email(),
+    password: Faker.Internet.user_name()
+  })
+end

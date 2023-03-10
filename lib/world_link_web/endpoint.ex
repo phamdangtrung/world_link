@@ -56,6 +56,10 @@ defmodule WorldLinkWeb.Endpoint do
     Host: #{inspect(conn.host)}
     """)
 
+    IO.puts("""
+      #{inspect(conn)}
+    """)
+
     conn
   end
 end

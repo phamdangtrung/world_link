@@ -13,11 +13,13 @@ defmodule WorldLink.IdentityTests.UserTest do
         name: "some name",
         password: "somepassword"
       }
+
       invalid_attrs = %{
         email: "sam@doe.com",
         name: "some name",
         password: "somepassword1"
       }
+
       {:ok, user} = Identity.create_user(valid_attrs)
 
       assert User.valid_password?(user, valid_attrs.password)

@@ -9,7 +9,7 @@ defmodule WorldLink.Identity do
   alias WorldLink.Identity.User
 
   @doc """
-  Returns the list of users.
+  Returns the list of users with pagination.
 
   ## Examples
 
@@ -17,8 +17,20 @@ defmodule WorldLink.Identity do
       [%User{}, ...]
 
   """
-  def list_users do
-    Repo.all(User)
+  def list_users(opts \\ []) do
+    defaults = %{
+      page: 1,
+      page_size: 10
+    }
+
+    %{page: page, page_size: page_size} = Enum.into(opts, defaults)
+
+    Repo.all(
+      from users in User,
+        select: [:id, :name, :activated, :provider_uid, :uuid, :oauth_provider],
+        limit: ^page_size,
+        offset: ^((page - 1) * page_size)
+    )
   end
 
   @doc """
@@ -73,6 +85,7 @@ defmodule WorldLink.Identity do
       {:error, %Ecto.Changeset{}}
 
   """
+
   # def update_user(%User{} = user, attrs) do
   #   user
   #   |> User.changeset(attrs)
@@ -104,6 +117,7 @@ defmodule WorldLink.Identity do
       %Ecto.Changeset{data: %User{}}
 
   """
+
   # def change_user(%User{} = user, attrs \\ %{}) do
   #   User.changeset(user, attrs)
   # end

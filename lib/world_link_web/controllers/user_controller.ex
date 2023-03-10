@@ -1,32 +1,17 @@
 defmodule WorldLinkWeb.UserController do
   use WorldLinkWeb, :controller
+  alias WorldLink.Identity
+
+  def index(conn, %{"page" => page, "page_size" => page_size}) do
+    {page, _} = Integer.parse(page)
+    {page_size, _} = Integer.parse(page_size)
+    users = Identity.list_users(page: page, page_size: page_size)
+
+    render(conn, "show.json", users: users)
+  end
 
   def index(conn, _params) do
-    user1 = %{
-      id: "1",
-      name: "TunTun",
-      email: "test@example.com",
-      activated: false,
-      provider_uid: "uid",
-      oauth_provider: "discord",
-      uuid: "uuid",
-      inserted_at: DateTime.utc_now(),
-      updated_at: DateTime.utc_now()
-    }
-
-    user2 = %{
-      id: "2",
-      name: "TunTun",
-      email: "test@example.com",
-      activated: false,
-      provider_uid: "uid",
-      oauth_provider: "discord",
-      uuid: "uuid",
-      inserted_at: DateTime.utc_now(),
-      updated_at: DateTime.utc_now()
-    }
-
-    users = [user1, user2]
+    users = Identity.list_users()
 
     render(conn, "show.json", users: users)
   end

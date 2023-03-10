@@ -12,13 +12,6 @@ defmodule WorldLink.Repo do
       |> Keyword.put(:hostname, System.get_env("PGHOST"))
       |> Keyword.put(:port, System.get_env("PGPORT"))
 
-      # config
-      # |> Keyword.put(:username, "postgres")
-      # |> Keyword.put(:password, "123")
-      # |> Keyword.put(:database, "wl_development")
-      # |> Keyword.put(:hostname, "localhost")
-      # |> Keyword.put(:port, 5432)
-
     {:ok, config}
   end
 end

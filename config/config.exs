@@ -53,7 +53,8 @@ config :ueberauth, Ueberauth,
     discord:
       {Ueberauth.Strategy.Discord,
        [
-         default_scope: "identify connections email guilds",
+        #  default_scope: "identify connections email guilds",
+         default_scope: "email",
          prompt: "none"
        ]}
   ]
@@ -66,6 +67,11 @@ config :ueberauth, Ueberauth,
 config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
   client_id: "1080413348081958922",
   client_secret: "384DtQlPrie0fjvLy6jpk73Opm34bHI3"
+
+config :stripity_stripe,
+  api_key: "sk_test_51MmSWJAgrTXGiFxd0xUx3lBd2CiPfPBpvHtGXeBb4nrGE89V5cVs5tg9PjBa011URub7sNvvhGvsbm3X9gz4eWZy00bXdxQ9Eg",
+  hackney_opts: [{:connect_timeout, 1000}, {:recv_timeout, 5000}],
+  retries: [max_attempts: 2, base_backoff: 500, max_backoff: 2_000]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

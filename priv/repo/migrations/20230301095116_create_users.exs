@@ -3,23 +3,14 @@ defmodule WorldLink.Repo.Migrations.CreateUsers do
 
   def change do
     create table(:users) do
-      add :name, :string
-      add :email, :string
-      add :handle, :string
-      add :auth_token, :string
-      add :auth_token_expires_at, :utc_datetime
+      add :name, :string, size: 50, null: false
+      add :nickname, :string, size: 50, null: false
+      add :email, :string, size: 255, null: false
       add :activated, :boolean, default: false, null: false
       add :activated_at, :utc_datetime
-      add :provider_uid, :string
-      add :uuid, :string
-      add :oauth_provider, :string
-      add :hashed_password, :string
+      add :hashed_password, :string, size: 200
 
       timestamps()
     end
-
-    create unique_index(:users, [:email])
-    create unique_index(:users, [:uuid])
-    create unique_index(:users, [:provider_uid, :oauth_provider])
   end
 end

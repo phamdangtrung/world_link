@@ -1,42 +1,53 @@
 defmodule WorldLink.Identity.User do
   @moduledoc false
 
-  use Ecto.Schema
+  use WorldLink.Schema
   import Ecto.Changeset
 
-  alias WorldLink.Identity.User
+  alias WorldLink.Identity.{User, OauthProfile}
 
   schema "users" do
     field :activated, :boolean, default: false
     field :activated_at, :utc_datetime
-    field :auth_token, :string
-    field :auth_token_expires_at, :utc_datetime
     field :email, :string
-    field :handle, :string
     field :name, :string
-    field :provider_uid, :string
-    field :uuid, :string
-    field :oauth_provider, Ecto.Enum, values: [:discord, :facebook, :twitter, :google]
+    field :nickname, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
 
+    has_many :oauth_profiles, OauthProfile
     timestamps()
   end
 
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:name, :email, :password])
+    |> cast(attrs, [:nickname, :name, :email, :password])
+    |> validate_name()
+    |> validate_nickname()
     |> validate_email()
     |> validate_password()
-    |> assign_uuid()
   end
 
   def oauth_registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:name, :email, :provider_uid, :oauth_provider])
+    |> cast(attrs, [:nickname, :name, :email])
     |> validate_email()
-    |> validate_provider_uid()
-    |> assign_uuid()
+  end
+
+  defp validate_name(changeset) do
+    changeset
+    |> validate_length(:name, max: 50)
+  end
+
+  defp validate_nickname(changeset) do
+    changeset
+    |> validate_required([:nickname])
+    |> validate_format(:nickname, ~r/^[a-z0-9_-]+$/,
+      message: "can only include alphnumeric characters and - or _"
+    )
+    |> validate_length(:nickname, min: 5, max: 50)
+    |> unsafe_validate_unique(:nickname, WorldLink.Repo)
+    |> unique_constraint(:nickname)
   end
 
   defp validate_email(changeset) do
@@ -44,7 +55,7 @@ defmodule WorldLink.Identity.User do
     |> validate_required([:email])
     |> normalize_email()
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
-    |> validate_length(:email, min: 5, max: 160)
+    |> validate_length(:email, min: 5, max: 255)
     |> unsafe_validate_unique(:email, WorldLink.Repo)
     |> unique_constraint(:email)
   end
@@ -73,19 +84,6 @@ defmodule WorldLink.Identity.User do
 
     changeset
     |> put_change(:email, String.downcase(email))
-  end
-
-  defp assign_uuid(changeset) when changeset.valid? == true do
-    changeset
-    |> put_change(:uuid, UUID.uuid1(:hex))
-  end
-
-  defp assign_uuid(changeset), do: changeset
-
-  defp validate_provider_uid(changeset) do
-    changeset
-    |> unsafe_validate_unique([:provider_uid, :oauth_provider], WorldLink.Repo)
-    |> unique_constraint([:provider_uid, :oauth_provider])
   end
 
   def valid_password?(%User{hashed_password: hashed_password}, password)

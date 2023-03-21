@@ -10,6 +10,12 @@ import Config
 config :world_link,
   ecto_repos: [WorldLink.Repo]
 
+# Configuration for migration primary key
+
+config :world_link,
+       WorldLink.Repo,
+       migration_primary_key: [name: :id, type: :binary_id]
+
 # Configures the endpoint
 config :world_link, WorldLinkWeb.Endpoint,
   url: [host: "localhost"],
@@ -53,7 +59,7 @@ config :ueberauth, Ueberauth,
     discord:
       {Ueberauth.Strategy.Discord,
        [
-        #  default_scope: "identify connections email guilds",
+         #  default_scope: "identify connections email guilds",
          default_scope: "email",
          prompt: "none"
        ]}
@@ -68,8 +74,11 @@ config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
   client_id: "1080413348081958922",
   client_secret: "384DtQlPrie0fjvLy6jpk73Opm34bHI3"
 
+# Configuration for Stripe
+
 config :stripity_stripe,
-  api_key: "sk_test_51MmSWJAgrTXGiFxd0xUx3lBd2CiPfPBpvHtGXeBb4nrGE89V5cVs5tg9PjBa011URub7sNvvhGvsbm3X9gz4eWZy00bXdxQ9Eg",
+  api_key:
+    "sk_test_51MmSWJAgrTXGiFxd0xUx3lBd2CiPfPBpvHtGXeBb4nrGE89V5cVs5tg9PjBa011URub7sNvvhGvsbm3X9gz4eWZy00bXdxQ9Eg",
   hackney_opts: [{:connect_timeout, 1000}, {:recv_timeout, 5000}],
   retries: [max_attempts: 2, base_backoff: 500, max_backoff: 2_000]
 

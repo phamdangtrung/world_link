@@ -67,7 +67,8 @@ defmodule WorldLink.MixProject do
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.17", only: [:dev, :test]},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
-      {:stripity_stripe, "~> 2.17"}
+      {:stripity_stripe, "~> 2.17"},
+      {:ecto_ulid_next, "~> 1.0"}
     ]
   end
 

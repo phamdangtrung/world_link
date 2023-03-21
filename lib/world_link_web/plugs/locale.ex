@@ -1,4 +1,5 @@
 defmodule WorldLinkWeb.Locale do
+  @moduledoc false
   import Plug.Conn
 
   @locales ["en", "vn"]

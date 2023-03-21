@@ -4,9 +4,11 @@ defmodule WorldLink.Identity do
   """
 
   import Ecto.Query, warn: false
-  alias WorldLink.Repo
 
+  alias WorldLink.Repo
+  alias Ecto.Multi
   alias WorldLink.Identity.User
+  alias WorldLink.Identity.OauthProfile
 
   @doc """
   Returns the list of users with pagination.
@@ -67,27 +69,73 @@ defmodule WorldLink.Identity do
     |> Repo.insert()
   end
 
-  def create_oauth_user(attrs \\ %{}) do
-    %User{}
-    |> User.oauth_registration_changeset(attrs)
-    |> Repo.insert()
-  end
-
   @doc """
-  Returns an `%Ecto.Changeset{}` for tracking user changes.
+  Creates a user using OAuth2.
 
   ## Examples
 
-      iex> change_user(user)
-      %Ecto.Changeset{data: %User{}}
+      iex> create_oauth_user(%{field: value})
+      {:ok, %User{}}
+
+      iex> create_oauth_user(%{field: bad_value})
+      {:error, "message"}
 
   """
 
-  # def change_user(%User{} = user, attrs \\ %{}) do
-  #   User.changeset(user, attrs)
-  # end
+  def create_oauth_user(attrs \\ %{}) do
+    Multi.new()
+    |> Multi.insert(:user, User.oauth_registration_changeset(%User{}, attrs))
+    |> Multi.run(:oauth_profile, fn repo, %{user: user} ->
+      OauthProfile.registration_changeset(user, attrs)
+      |> repo.insert()
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user, oauth_profile: _}} ->
+        {:ok, user}
 
-  ## Database getters
+      {:error, :user} ->
+        {:error, "An error occurred when trying to register this user."}
+
+      {:error, :oauth_profile} ->
+        {:error, "An error occurred when trying to register an oauth profile for this user."}
+
+      {:error, _} ->
+        {:error, "An unknown error."}
+    end
+  end
+
+  @doc """
+  Returns a tuple for checking user existence.
+
+  ## Examples
+
+      iex> verify_user_existence(attrs)
+      {:ok}
+
+      iex> verify_user_existence(attrs)
+      {:error, :user_already_exists}
+
+  """
+
+  def verify_user_existence(attrs \\ []) do
+    defaults = %{
+      provider_uid: nil,
+      oauth_provider: nil
+    }
+
+    %{email: email, provider_uid: provider_uid, oauth_provider: oauth_provider} =
+      Enum.into(attrs, defaults)
+
+    with nil <- get_user_by_email(email),
+         nil <- get_oauth_user(provider_uid, oauth_provider) do
+      {:ok}
+    else
+      _ -> {:error, :user_already_exists}
+    end
+  end
+
+  # Database getters
 
   @doc """
   Gets a user by email.
@@ -123,7 +171,6 @@ defmodule WorldLink.Identity do
     if User.valid_password?(user, password), do: user
   end
 
-
   @doc """
   Gets a user by oauth credentials.
 
@@ -137,7 +184,9 @@ defmodule WorldLink.Identity do
 
   """
   def get_oauth_user(provider_uid, oauth_provider)
-    when is_binary(provider_uid) and is_atom(oauth_provider) do
-    Repo.get_by(User, [provider_uid: provider_uid, oauth_provider: oauth_provider])
+      when is_binary(provider_uid) and is_atom(oauth_provider) do
+    Repo.get_by(OauthProfile, provider_uid: provider_uid, oauth_provider: oauth_provider)
   end
+
+  def get_oauth_user(_provider_uid, _oauth_provider), do: nil
 end

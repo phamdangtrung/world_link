@@ -62,7 +62,13 @@ config :ueberauth, Ueberauth,
          #  default_scope: "identify connections email guilds",
          default_scope: "email",
          prompt: "none"
-       ]}
+       ]},
+
+    facebook:
+      {Ueberauth.Strategy.Facebook,
+      [
+        default_scope: "email,public_profile"
+      ]}
   ]
 
 # Strategy provider configuration
@@ -73,6 +79,10 @@ config :ueberauth, Ueberauth,
 config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
   client_id: "1080413348081958922",
   client_secret: "384DtQlPrie0fjvLy6jpk73Opm34bHI3"
+
+config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
+  client_id: "943252580360716",
+  client_secret: "2b570e7a587af6069b1bce4dbeb5a411"
 
 # Configuration for Stripe
 

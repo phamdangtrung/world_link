@@ -62,6 +62,7 @@ defmodule WorldLink.MixProject do
       {:ecto_psql_extras, "~> 0.6"},
       {:ueberauth, "~> 0.7"},
       {:ueberauth_discord, "~> 0.6"},
+      {:ueberauth_facebook, "~> 0.8"},
       {:argon2_elixir, "~> 3.0"},
       {:uuid, "~> 1.1"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},

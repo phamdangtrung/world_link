@@ -30,4 +30,15 @@ defmodule WorldLinkWeb.AuthController do
       avatar: params.info.image
     }
   end
+
+  defp build_params_based_on_provider(:facebook, params) do
+    %{
+      provider_uid: params.uid,
+      oauth_provider: :facebook,
+      name: params.info.name || params.info.nickname,
+      nickname: params.info.nickname || params.info.name,
+      email: params.info.email,
+      avatar: params.info.image
+    }
+  end
 end

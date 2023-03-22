@@ -11,13 +11,15 @@ defmodule WorldLink.IdentityTests.UserTest do
       valid_attrs = %{
         email: "sam@doe.com",
         name: "some name",
-        password: "somepassword"
+        password: "somepassword",
+        nickname: "some_nickanem"
       }
 
       invalid_attrs = %{
         email: "sam@doe.com",
         name: "some name",
-        password: "somepassword1"
+        password: "somepassword1",
+        nickname: "some_nickanem"
       }
 
       {:ok, user} = Identity.create_user(valid_attrs)

@@ -15,18 +15,26 @@ defmodule WorldLink.IdentityFixtures do
         activated: true,
         activated_at: ~U[2023-02-28 09:51:00Z] |> DateTime.truncate(:second),
         approved: true,
-        auth_token: "some auth_token",
-        auth_token_expires_at: ~U[2023-02-28 09:51:00Z],
         email: "sam@doe.com",
-        handle: "some handle",
         name: "some name",
-        uuid: "uuid",
-        oauth_provider: "google",
-        provider_uuid: "provider-uuid",
         password: "somepassword"
       })
-      |> WorldLink.Identity.create_user()
+      # |> WorldLink.Identity.create_user()
 
     user
   end
+
+  @doc """
+  Generate a oauth_profile.
+  """
+  # def oauth_profile_fixture(attrs \\ %{}) do
+  #   {:ok, oauth_profile} =
+  #     attrs
+  #     |> Enum.into(%{
+  #       oauth_provider: "some oauth_provider"
+  #     })
+  #     |> WorldLink.Identity.create_oauth_profile()
+
+  #   oauth_profile
+  # end
 end

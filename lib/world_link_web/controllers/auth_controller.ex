@@ -9,8 +9,14 @@ defmodule WorldLinkWeb.AuthController do
     assigns = conn.assigns.ueberauth_auth
     user_params = build_params_based_on_provider(assigns.provider, assigns)
 
-    case Identity.create_oauth_user(user_params) do
-      {:ok, user} -> render(conn, "show.json", user: user)
+    case Identity.verify_user_existence(user_params) do
+      {:ok} ->
+        {:ok, user} = Identity.create_oauth_user(user_params)
+        render(conn, "show.json", user: user)
+
+      {:error, :user_already_exists} ->
+        user = Identity.get_user_by_email(user_params.email)
+        render(conn, "show.json", user: user)
     end
   end
 
@@ -19,6 +25,7 @@ defmodule WorldLinkWeb.AuthController do
       provider_uid: params.uid,
       oauth_provider: :discord,
       name: params.info.name || params.info.nickname,
+      nickname: params.info.nickname || params.info.name,
       email: params.info.email,
       avatar: params.info.image
     }

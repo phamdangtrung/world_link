@@ -4,9 +4,11 @@ defmodule WorldLink.Identity do
   """
 
   import Ecto.Query, warn: false
-  alias WorldLink.Repo
 
+  alias WorldLink.Repo
+  alias Ecto.Multi
   alias WorldLink.Identity.User
+  alias WorldLink.Identity.OauthProfile
 
   @doc """
   Returns the list of users with pagination.
@@ -67,62 +69,73 @@ defmodule WorldLink.Identity do
     |> Repo.insert()
   end
 
+  @doc """
+  Creates a user using OAuth2.
+
+  ## Examples
+
+      iex> create_oauth_user(%{field: value})
+      {:ok, %User{}}
+
+      iex> create_oauth_user(%{field: bad_value})
+      {:error, "message"}
+
+  """
+
   def create_oauth_user(attrs \\ %{}) do
-    %User{}
-    |> User.oauth_registration_changeset(attrs)
-    |> Repo.insert()
+    Multi.new()
+    |> Multi.insert(:user, User.oauth_registration_changeset(%User{}, attrs))
+    |> Multi.run(:oauth_profile, fn repo, %{user: user} ->
+      OauthProfile.registration_changeset(user, attrs)
+      |> repo.insert()
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{user: user, oauth_profile: _}} ->
+        {:ok, user}
+
+      {:error, :user} ->
+        {:error, "An error occurred when trying to register this user."}
+
+      {:error, :oauth_profile} ->
+        {:error, "An error occurred when trying to register an oauth profile for this user."}
+
+      {:error, _} ->
+        {:error, "An unknown error."}
+    end
   end
 
   @doc """
-  Updates a user.
+  Returns a tuple for checking user existence.
 
   ## Examples
 
-      iex> update_user(user, %{field: new_value})
-      {:ok, %User{}}
+      iex> verify_user_existence(attrs)
+      {:ok}
 
-      iex> update_user(user, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-
-  # def update_user(%User{} = user, attrs) do
-  #   user
-  #   |> User.changeset(attrs)
-  #   |> Repo.update()
-  # end
-
-  @doc """
-  Deletes a user.
-
-  ## Examples
-
-      iex> delete_user(user)
-      {:ok, %User{}}
-
-      iex> delete_user(user)
-      {:error, %Ecto.Changeset{}}
+      iex> verify_user_existence(attrs)
+      {:error, :user_already_exists}
 
   """
-  def delete_user(%User{} = user) do
-    Repo.delete(user)
+
+  def verify_user_existence(attrs \\ []) do
+    defaults = %{
+      provider_uid: nil,
+      oauth_provider: nil
+    }
+
+    %{email: email, provider_uid: provider_uid, oauth_provider: oauth_provider} =
+      Enum.into(attrs, defaults)
+
+    with nil <- get_user_by_email(email),
+         nil <- get_oauth_user(provider_uid, oauth_provider) do
+      {:ok}
+    else
+      _ -> {:error, :user_already_exists}
+    end
   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking user changes.
-
-  ## Examples
-
-      iex> change_user(user)
-      %Ecto.Changeset{data: %User{}}
-
-  """
-
-  # def change_user(%User{} = user, attrs \\ %{}) do
-  #   User.changeset(user, attrs)
-  # end
-
-  ## Database getters
+  # Database getters
 
   @doc """
   Gets a user by email.
@@ -157,4 +170,23 @@ defmodule WorldLink.Identity do
     user = Repo.get_by(User, email: email)
     if User.valid_password?(user, password), do: user
   end
+
+  @doc """
+  Gets a user by oauth credentials.
+
+  ## Examples
+
+      iex> get_oauth_user("some-correct-uuid", :provider)
+      %User{}
+
+      iex> get_oauth_user("some-incorrect-uuid", :provider)
+      nil
+
+  """
+  def get_oauth_user(provider_uid, oauth_provider)
+      when is_binary(provider_uid) and is_atom(oauth_provider) do
+    Repo.get_by(OauthProfile, provider_uid: provider_uid, oauth_provider: oauth_provider)
+  end
+
+  def get_oauth_user(_provider_uid, _oauth_provider), do: nil
 end

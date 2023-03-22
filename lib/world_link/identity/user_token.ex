@@ -1,4 +1,5 @@
 defmodule WorldLink.Identity.UserToken do
+  @moduledoc false
   use Ecto.Schema
   import Ecto.Query
   alias WorldLink.Accounts.UserToken

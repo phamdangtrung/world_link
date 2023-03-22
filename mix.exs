@@ -10,7 +10,16 @@ defmodule WorldLink.MixProject do
       compilers: [] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+
+      # Docs
+      name: "World Link",
+      source_url: "https://github.com/phamdangtrung/world_link",
+      homepage_url: "http://localhost:4000",
+      docs: [
+        main: "World Link",
+        extras: ["README.md"]
+      ]
     ]
   end
 
@@ -56,7 +65,10 @@ defmodule WorldLink.MixProject do
       {:argon2_elixir, "~> 3.0"},
       {:uuid, "~> 1.1"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:faker, "~> 0.17", only: [:dev, :test]}
+      {:faker, "~> 0.17", only: [:dev, :test]},
+      {:ex_doc, "~> 0.27", only: :dev, runtime: false},
+      {:stripity_stripe, "~> 2.17"},
+      {:ecto_ulid_next, "~> 1.0"}
     ]
   end
 

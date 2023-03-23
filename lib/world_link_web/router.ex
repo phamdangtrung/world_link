@@ -16,6 +16,10 @@ defmodule WorldLinkWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :auth do
+    plug WorldLinkWeb.Authentication.Pipeline
+  end
+
   scope "/", WorldLinkWeb do
     pipe_through :browser
 
@@ -31,7 +35,7 @@ defmodule WorldLinkWeb.Router do
 
   # Other scopes may use custom stacks.
   scope "/api", WorldLinkWeb do
-    pipe_through :api
+    pipe_through [:api, :auth]
 
     get "/users", UserController, :index
   end

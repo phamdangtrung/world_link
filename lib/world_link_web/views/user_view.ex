@@ -9,10 +9,6 @@ defmodule WorldLinkWeb.UserView do
     %{data: render_many(users, __MODULE__, "user_reduced.json")}
   end
 
-  def render("403", _) do
-    render_one(nil, __MODULE__, "403.json", as: :error)
-  end
-
   def render("user.json", %{user: user}) do
     %{
       id: user.id,
@@ -37,9 +33,4 @@ defmodule WorldLinkWeb.UserView do
     }
   end
 
-  def render("403.json", _) do
-    %{
-      error: "unauthorized"
-    }
-  end
 end

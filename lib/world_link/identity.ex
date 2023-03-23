@@ -29,7 +29,7 @@ defmodule WorldLink.Identity do
 
     Repo.all(
       from users in User,
-        select: [:id, :name, :activated, :provider_uid, :uuid, :oauth_provider],
+        select: [:id, :name, :activated, :nickname, :email],
         limit: ^page_size,
         offset: ^((page - 1) * page_size)
     )
@@ -168,7 +168,15 @@ defmodule WorldLink.Identity do
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
     user = Repo.get_by(User, email: email)
-    if User.valid_password?(user, password), do: user
+    if User.valid_password?(user, password) do
+      user
+    else
+      User.valid_password?(nil, nil)
+    end
+  end
+
+  def verify_password(%User{} = user, password) do
+    User.valid_password?(user, password)
   end
 
   @doc """

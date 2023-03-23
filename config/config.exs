@@ -23,6 +23,11 @@ config :world_link, WorldLinkWeb.Endpoint,
   pubsub_server: WorldLink.PubSub,
   live_view: [signing_salt: "UdqkcrYi"]
 
+# Configures Guardian
+config :world_link, WorldLinkWeb.Authentication.Guardian,
+  issuer: "world_link",
+  secret_key: "RtII21elWJmCKDCIHO4os3x2Mc4mDJGqnwIbsc/EQvmpWPOYcDL6DL06U6NLsvR4"
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
@@ -63,12 +68,11 @@ config :ueberauth, Ueberauth,
          default_scope: "email",
          prompt: "none"
        ]},
-
     facebook:
       {Ueberauth.Strategy.Facebook,
-      [
-        default_scope: "email,public_profile"
-      ]}
+       [
+         default_scope: "email,public_profile"
+       ]}
   ]
 
 # Strategy provider configuration

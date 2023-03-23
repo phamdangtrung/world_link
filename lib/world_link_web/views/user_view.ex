@@ -13,10 +13,9 @@ defmodule WorldLinkWeb.UserView do
     %{
       id: user.id,
       name: user.name,
+      nickname: user.nickname,
+      email: user.email,
       activated: user.activated,
-      provider_uid: user.provider_uid,
-      uuid: user.uuid,
-      oauth_provider: user.oauth_provider,
       inserted_at: user.inserted_at,
       updated_at: user.updated_at
     }
@@ -26,10 +25,12 @@ defmodule WorldLinkWeb.UserView do
     %{
       id: user.id,
       name: user.name,
+      nickname: user.nickname,
+      email: user.email,
       activated: user.activated,
-      provider_uid: user.provider_uid,
-      uuid: user.uuid,
-      oauth_provider: user.oauth_provider
+      inserted_at: user.inserted_at,
+      updated_at: user.updated_at
     }
   end
+
 end

@@ -93,7 +93,6 @@ defmodule WorldLink.Identity.User do
 
   def valid_password?(_, _) do
     Argon2.no_user_verify()
-    false
   end
 
   def confirm_changeset(user) do

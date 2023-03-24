@@ -14,6 +14,7 @@ defmodule WorldLink.Identity.User do
     field :nickname, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
+    field :role_name, Ecto.Enum, values: [:user, :admin]
 
     has_many :oauth_profiles, OauthProfile
     timestamps()

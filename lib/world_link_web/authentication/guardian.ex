@@ -2,6 +2,9 @@ defmodule WorldLinkWeb.Authentication.Guardian do
   use Guardian, otp_app: :world_link
   alias WorldLink.Identity
 
+  @refresh_token_ttl_in_days 30
+  @access_token_ttl_in_hours 24
+
   def subject_for_token(%{id: id}, _claim) do
     sub = to_string(id)
     {:ok, sub}
@@ -35,8 +38,17 @@ defmodule WorldLinkWeb.Authentication.Guardian do
     end
   end
 
+  def verify_access_token(token) do
+    decode_and_verify(token, %{typ: "access", max_age: {@access_token_ttl_in_hours, :hour}, verify_issuer: true})
+  end
+
+  def verify_refresh_token(token) do
+    decode_and_verify(token, %{typ: "refresh", max_age: {@refresh_token_ttl_in_days, :day}, verify_issuer: true})
+  end
+
   defp create_token(user) do
-    {:ok, token, _claims} = encode_and_sign(user)
-    {:ok, user, token}
+    {:ok, access_token, _claims} = encode_and_sign(user, %{role: user.role_name}, [ttl: {@access_token_ttl_in_hours, :hour}, token_type: "access", verify_issuer: true, auth_time: true])
+    {:ok, refresh_token, _claims} = encode_and_sign(user, %{}, [ttl: {@refresh_token_ttl_in_days, :day}, token_type: "refresh", verify_issuer: true, auth_time: true])
+    {:ok, access_token: access_token, refresh_token: refresh_token}
   end
 end

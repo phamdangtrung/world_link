@@ -6,6 +6,7 @@ defmodule WorldLinkWeb.Authentication.Pipeline do
 
   plug Guardian.Plug.VerifySession
   plug Guardian.Plug.VerifyHeader
-  plug Guardian.Plug.EnsureAuthenticated
+  plug Guardian.Plug.EnsureAuthenticated, claims: %{"typ" => "access"}
   plug Guardian.Plug.LoadResource
+  # plug WorldLinkWeb.Plugs.EnsureRolePlug, :admin
 end

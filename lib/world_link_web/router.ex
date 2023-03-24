@@ -20,6 +20,10 @@ defmodule WorldLinkWeb.Router do
     plug WorldLinkWeb.Authentication.Pipeline
   end
 
+  pipeline :admin do
+    plug WorldLinkWeb.Plugs.EnsureRolePlug, [:admin]
+  end
+
   scope "/", WorldLinkWeb do
     pipe_through :browser
 
@@ -35,7 +39,7 @@ defmodule WorldLinkWeb.Router do
 
   # Other scopes may use custom stacks.
   scope "/api", WorldLinkWeb do
-    pipe_through [:api, :auth]
+    pipe_through [:api, :auth, :admin]
 
     get "/users", UserController, :index
   end

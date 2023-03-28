@@ -29,7 +29,7 @@ defmodule WorldLink.Identity do
 
     Repo.all(
       from users in User,
-        select: [:id, :name, :activated, :nickname, :email],
+        select: [:id, :name, :activated, :username, :email],
         limit: ^page_size,
         offset: ^((page - 1) * page_size)
     )

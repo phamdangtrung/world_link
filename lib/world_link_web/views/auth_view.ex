@@ -9,7 +9,7 @@ defmodule WorldLinkWeb.AuthView do
     %{
       id: user.id,
       name: user.name,
-      nickname: user.nickname,
+      username: user.username,
       email: user.email,
       activated: user.activated,
       inserted_at: user.inserted_at,

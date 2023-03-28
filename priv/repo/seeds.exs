@@ -13,7 +13,7 @@
 for _ <- 1..20 do
   WorldLink.Repo.insert!(%WorldLink.Identity.User{
     name: Faker.Person.name(),
-    nickname: Faker.Internet.user_name(),
+    username: Faker.Internet.user_name(),
     email: Faker.Internet.email(),
     password: Faker.Internet.user_name()
   })

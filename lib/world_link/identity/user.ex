@@ -11,7 +11,7 @@ defmodule WorldLink.Identity.User do
     field :activated_at, :utc_datetime
     field :email, :string
     field :name, :string
-    field :nickname, :string
+    field :username, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :role_name, Ecto.Enum, values: [:user, :admin]
@@ -22,16 +22,16 @@ defmodule WorldLink.Identity.User do
 
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:nickname, :name, :email, :password])
+    |> cast(attrs, [:username, :name, :email, :password])
     |> validate_name()
-    |> validate_nickname()
+    |> validate_username()
     |> validate_email()
     |> validate_password()
   end
 
   def oauth_registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:nickname, :name, :email])
+    |> cast(attrs, [:username, :name, :email])
     |> validate_email()
   end
 
@@ -40,15 +40,15 @@ defmodule WorldLink.Identity.User do
     |> validate_length(:name, max: 50)
   end
 
-  defp validate_nickname(changeset) do
+  defp validate_username(changeset) do
     changeset
-    |> validate_required([:nickname])
-    |> validate_format(:nickname, ~r/^[a-z0-9_-]+$/,
+    |> validate_required([:username])
+    |> validate_format(:username, ~r/^[a-z0-9_-]+$/,
       message: "can only include alphnumeric characters and - or _"
     )
-    |> validate_length(:nickname, min: 5, max: 50)
-    |> unsafe_validate_unique(:nickname, WorldLink.Repo)
-    |> unique_constraint(:nickname)
+    |> validate_length(:username, min: 5, max: 50)
+    |> unsafe_validate_unique(:username, WorldLink.Repo)
+    |> unique_constraint(:username)
   end
 
   defp validate_email(changeset) do

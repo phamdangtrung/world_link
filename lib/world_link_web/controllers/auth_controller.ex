@@ -25,7 +25,7 @@ defmodule WorldLinkWeb.AuthController do
       provider_uid: params.uid,
       oauth_provider: :discord,
       name: params.info.name || params.info.nickname,
-      nickname: params.info.nickname || params.info.name,
+      username: params.info.nickname || params.info.name,
       email: params.info.email,
       avatar: params.info.image
     }
@@ -36,7 +36,7 @@ defmodule WorldLinkWeb.AuthController do
       provider_uid: params.uid,
       oauth_provider: :facebook,
       name: params.info.name || params.info.nickname,
-      nickname: params.info.nickname || params.info.name,
+      username: params.info.nickname || params.info.name,
       email: params.info.email,
       avatar: params.info.image
     }

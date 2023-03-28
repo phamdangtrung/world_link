@@ -1,4 +1,4 @@
-defmodule  WorldLinkWeb.Authentication.ErrorHandler do
+defmodule WorldLinkWeb.Authentication.ErrorHandler do
   import Plug.Conn
 
   def auth_error(conn, {type, _reason}, _opts) do

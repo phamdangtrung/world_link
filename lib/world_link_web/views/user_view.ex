@@ -32,5 +32,4 @@ defmodule WorldLinkWeb.UserView do
       updated_at: user.updated_at
     }
   end
-
 end

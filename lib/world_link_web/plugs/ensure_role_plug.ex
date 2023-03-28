@@ -8,12 +8,6 @@ defmodule WorldLinkWeb.Plugs.EnsureRolePlug do
 
   def call(conn, roles) do
     conn
-    |> Guardian.Plug.current_resource() |> IO.inspect()
-
-    conn
-    |> Guardian.Plug.current_resource() |> has_role?(conn)|> IO.inspect()
-
-    conn
     |> Guardian.Plug.current_resource()
     |> has_role?(roles)
     |> maybe_halt(conn)
@@ -30,9 +24,11 @@ defmodule WorldLinkWeb.Plugs.EnsureRolePlug do
   end
 
   def has_role?(nil, _roles), do: false
+
   def has_role?(user, roles) when is_list(roles) do
     Enum.any?(roles, &has_role?(user, &1))
   end
+
   def has_role?(%{role_name: role}, role), do: true
   def has_role?(_user, _role), do: false
 end

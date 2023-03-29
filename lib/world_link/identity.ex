@@ -36,7 +36,7 @@ defmodule WorldLink.Identity do
   end
 
   @doc """
-  Gets a single user.
+  Gets a single user using id.
 
   Raises `Ecto.NoResultsError` if the User does not exist.
 
@@ -75,10 +75,16 @@ defmodule WorldLink.Identity do
   ## Examples
 
       iex> create_oauth_user(%{field: value})
-      {:ok, %User{}}
+      {:ok, %{user: %User{}, oauth_profile: _}}
 
       iex> create_oauth_user(%{field: bad_value})
-      {:error, "message"}
+      {:error, "An error occurred when trying to register this user."}
+
+      iex> create_oauth_user(%{field: bad_value})
+      {:error, "An error occurred when trying to register an oauth profile for this user."}
+
+      iex> create_oauth_user(%{field: bad_value})
+      {:error, "An unknown error."}
 
   """
 
@@ -106,7 +112,7 @@ defmodule WorldLink.Identity do
   end
 
   @doc """
-  Returns a tuple for checking user existence.
+  Verifies whether user with the provided email or a combination of provider_uid and oauth_provider exist in the database
 
   ## Examples
 
@@ -127,57 +133,94 @@ defmodule WorldLink.Identity do
     %{email: email, provider_uid: provider_uid, oauth_provider: oauth_provider} =
       Enum.into(attrs, defaults)
 
-    with nil <- get_user_by_email(email),
+    with nil <- get_oauth_user(email),
          nil <- get_oauth_user(provider_uid, oauth_provider) do
       {:ok}
     else
-      _ -> {:error, :user_already_exists}
+      user -> {:error, :user_already_exists, user}
     end
   end
 
-  # Database getters
-
   @doc """
-  Gets a user by email.
+  Gets a user by email or username.
 
   ## Examples
 
-      iex> get_user_by_email("foo@example.com")
-      %User{}
+      iex> get_user_by_email_or_username("foo@example.com")
+      {:ok, %User{}}
+
+      iex> get_user_by_email_or_username("foo_bar")
+      {:ok, %User{}}
 
       iex> get_user_by_email("unknown@example.com")
-      nil
+      {:error, :not_found}
+
+      iex> get_user_by_email("foo")
+      {:error, :not_found}
 
   """
-  def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
-  end
-
-  @doc """
-  Gets a user by email and password.
-
-  ## Examples
-
-      iex> get_user_by_email_and_password("foo@example.com", "correct_password")
-      %User{}
-
-      iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
-      nil
-
-  """
-  def get_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
-
-    if User.valid_password?(user, password) do
-      user
-    else
-      User.valid_password?(nil, nil)
+  def get_user_by_email_or_username(email_or_username) when is_binary(email_or_username) do
+    get_user_by_email(email_or_username)
+    |> get_user_by_username()
+    |> case do
+      %User{} = user -> {:ok, user}
+      nil -> {:error, :not_found}
     end
   end
 
-  def verify_password(%User{} = user, password) do
-    User.valid_password?(user, password)
+  defp get_user_by_email(email) when is_binary(email) do
+    Repo.get_by(User, normalized_email: email |> String.downcase())
+    |> case do
+      %User{} = user -> user
+      nil -> email
+    end
+  end
+
+  defp get_user_by_username(username) when is_binary(username) do
+    Repo.get_by(User, normalized_username: username |> String.downcase())
+    |> case do
+      %User{} = user -> user
+      nil -> nil
+    end
+  end
+
+  defp get_user_by_username(user) when is_struct(user), do: user
+
+  @doc """
+  Verifies password and returns a tuple.
+
+  ## Examples
+
+      iex> verify_user_and_password(%User{}, correct_password)
+      {:ok, user}
+
+      iex> verify_user_and_password(%User{}, incorrect_password)
+      {:error, :unauthenticated}
+
+  """
+
+  def verify_user_and_password(%User{} = user, password) do
+    if User.valid_password?(user, password) do
+      {:ok, user}
+    else
+      {:error, :unauthenticated}
+    end
+  end
+
+  @doc """
+  Gets a user by oauth credentials.
+
+  ## Examples
+
+      iex> get_oauth_user("some-correct-email")
+      %User{}
+
+      iex> get_oauth_user("some-incorrect-email")
+      nil
+
+  """
+  def get_oauth_user(email) when is_binary(email) do
+    Repo.get_by(User, normalized_email: email |> String.downcase())
   end
 
   @doc """

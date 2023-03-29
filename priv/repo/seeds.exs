@@ -11,7 +11,7 @@
 # and so on) as they will fail if something goes wrong.
 
 for _ <- 1..20 do
-  WorldLink.Repo.insert!(%WorldLink.Identity.User{
+  WorldLink.Identity.create_user(%{
     name: Faker.Person.name(),
     username: Faker.Internet.user_name(),
     email: Faker.Internet.email(),

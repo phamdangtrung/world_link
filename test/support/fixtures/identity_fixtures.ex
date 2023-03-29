@@ -3,11 +3,12 @@ defmodule WorldLink.IdentityFixtures do
   This module defines test helpers for creating
   entities via the `WorldLink.Identity` context.
   """
+  alias WorldLink.Identity
 
   @doc """
   Generate a user.
   """
-  def user_fixture(attrs \\ %{}) do
+  def user_with_google_oauth_fixture(attrs \\ %{}) do
     {:ok, user} =
       attrs
       |> Enum.into(%{
@@ -16,25 +17,21 @@ defmodule WorldLink.IdentityFixtures do
         activated_at: ~U[2023-02-28 09:51:00Z] |> DateTime.truncate(:second),
         approved: true,
         email: "sam@doe.com",
+        username: "samdoe",
         name: "some name",
         password: "somepassword"
       })
-      # |> WorldLink.Identity.create_user()
+      |> Identity.create_user()
 
-    user
+    oauth_attrs = %{
+      oauth_provider: :google,
+      provider_uid: "some-uuid-from-provider"
+    }
+
+    {:ok, complete_user} =
+      user
+      |> Identity.assign_oauth_profile(oauth_attrs)
+
+    {:ok, complete_user}
   end
-
-  @doc """
-  Generate a oauth_profile.
-  """
-  # def oauth_profile_fixture(attrs \\ %{}) do
-  #   {:ok, oauth_profile} =
-  #     attrs
-  #     |> Enum.into(%{
-  #       oauth_provider: "some oauth_provider"
-  #     })
-  #     |> WorldLink.Identity.create_oauth_profile()
-
-  #   oauth_profile
-  # end
 end

@@ -20,6 +20,10 @@ defmodule WorldLinkWeb.Router do
     plug WorldLinkWeb.Authentication.Pipeline
   end
 
+  pipeline :un_auth do
+    plug WorldLinkWeb.Authentication.UnauthPipeline
+  end
+
   pipeline :admin do
     plug WorldLinkWeb.Plugs.EnsureRolePlug, [:admin]
   end
@@ -31,8 +35,9 @@ defmodule WorldLinkWeb.Router do
   end
 
   scope "/auth", WorldLinkWeb do
-    pipe_through :api
+    pipe_through [:api, :un_auth]
 
+    post "/login", AuthController, :login
     get "/:provider", AuthController, :request
     get "/:provider/callback", AuthController, :callback
   end

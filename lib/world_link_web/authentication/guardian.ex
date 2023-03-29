@@ -1,4 +1,7 @@
 defmodule WorldLinkWeb.Authentication.Guardian do
+  @moduledoc """
+  Implementation module for Guardian
+  """
   use Guardian, otp_app: :world_link
   alias WorldLink.Identity
 
@@ -12,7 +15,6 @@ defmodule WorldLinkWeb.Authentication.Guardian do
 
   def subject_for_token(_, _), do: {:error, :reason_for_error}
 
-
   def resource_from_claims(%{"sub" => id}) do
     case Identity.get_user!(id) do
       nil -> {:error, :not_found}
@@ -21,20 +23,6 @@ defmodule WorldLinkWeb.Authentication.Guardian do
   end
 
   def resource_from_claims(_claims), do: {:error, :no_subject_provided}
-
-  def authenticate(email, password) do
-    case Identity.get_user_by_email(email) do
-      nil ->
-        {:error, :not_found}
-
-      user ->
-        Identity.verify_password(user, password)
-        |> case do
-          true -> create_token(user)
-          false -> {:error, :unauthorized}
-        end
-    end
-  end
 
   def verify_access_token(token) do
     decode_and_verify(
@@ -56,8 +44,8 @@ defmodule WorldLinkWeb.Authentication.Guardian do
     )
   end
 
-  defp create_token(user) do
-    {:ok, access_token: create_access_token(user), refresh_token: create_refresh_token(user)}
+  def create_token(user) do
+    {:ok, tokens: %{access: create_access_token(user), refresh: create_refresh_token(user)}}
   end
 
   defp create_access_token(user) do
@@ -86,9 +74,12 @@ defmodule WorldLinkWeb.Authentication.Guardian do
 
   def re_authenticate(refresh_token) do
     case(verify_refresh_token(refresh_token)) do
-      {:ok, claims} -> {:ok, resource} = resource_from_claims(claims)
+      {:ok, claims} ->
+        {:ok, resource} = resource_from_claims(claims)
         create_token(resource)
-      {:error, reason} -> {:error, reason}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 end

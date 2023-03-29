@@ -1,4 +1,7 @@
 defmodule WorldLinkWeb.Authentication.ErrorHandler do
+  @moduledoc """
+  Error handler for Guardian module
+  """
   import Plug.Conn
 
   def auth_error(conn, {type, _reason}, _opts) do

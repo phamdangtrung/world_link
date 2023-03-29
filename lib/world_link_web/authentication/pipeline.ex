@@ -1,4 +1,7 @@
 defmodule WorldLinkWeb.Authentication.Pipeline do
+  @moduledoc """
+  Pipeline to ensure the user is logged in
+  """
   use Guardian.Plug.Pipeline,
     otp_app: :world_link_api,
     module: WorldLinkWeb.Authentication.Guardian,

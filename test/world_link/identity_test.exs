@@ -22,13 +22,13 @@ defmodule WorldLink.IdentityTest do
         email: "sam@doe.com",
         name: "some name",
         password: "somepassword",
-        nickname: "some_nickname"
+        username: "username"
       }
 
       assert {:ok, %User{} = user} = Identity.create_user(valid_attrs)
       assert user.email == "sam@doe.com"
       assert user.name == "some name"
-      assert user.nickname == "some_nickname"
+      assert user.username == "username"
       assert user.id
     end
 

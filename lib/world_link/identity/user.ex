@@ -10,10 +10,13 @@ defmodule WorldLink.Identity.User do
     field :activated, :boolean, default: false
     field :activated_at, :utc_datetime
     field :email, :string
+    field :normalized_email, :string
     field :name, :string
-    field :nickname, :string
+    field :username, :string
+    field :normalized_username, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
+    field :role_name, Ecto.Enum, values: [:user, :admin]
 
     has_many :oauth_profiles, OauthProfile
     timestamps()
@@ -21,39 +24,43 @@ defmodule WorldLink.Identity.User do
 
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:nickname, :name, :email, :password])
+    |> cast(attrs, [:username, :name, :email, :password])
     |> validate_name()
-    |> validate_nickname()
+    |> validate_username()
     |> validate_email()
     |> validate_password()
   end
 
   def oauth_registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:nickname, :name, :email])
+    |> cast(attrs, [:username, :name, :email])
+    |> validate_name()
+    |> validate_username()
     |> validate_email()
   end
 
   defp validate_name(changeset) do
     changeset
+    |> validate_required(:name)
     |> validate_length(:name, max: 50)
   end
 
-  defp validate_nickname(changeset) do
+  defp validate_username(changeset) do
     changeset
-    |> validate_required([:nickname])
-    |> validate_format(:nickname, ~r/^[a-z0-9_-]+$/,
-      message: "can only include alphnumeric characters and - or _"
+    |> validate_required([:username])
+    |> normalize(:username)
+    |> validate_format(:username, ~r/^[a-zA-Z0-9_-]+$/,
+      message: "can only include alphanumeric characters and - or _"
     )
-    |> validate_length(:nickname, min: 5, max: 50)
-    |> unsafe_validate_unique(:nickname, WorldLink.Repo)
-    |> unique_constraint(:nickname)
+    |> validate_length(:username, min: 5, max: 50)
+    |> unsafe_validate_unique(:username, WorldLink.Repo)
+    |> unique_constraint(:username)
   end
 
   defp validate_email(changeset) do
     changeset
     |> validate_required([:email])
-    |> normalize_email()
+    |> normalize(:email)
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, min: 5, max: 255)
     |> unsafe_validate_unique(:email, WorldLink.Repo)
@@ -79,11 +86,12 @@ defmodule WorldLink.Identity.User do
     end
   end
 
-  defp normalize_email(changeset) do
-    email = get_change(changeset, :email)
+  defp normalize(changeset, field) when is_atom(field) do
+    field_value = get_change(changeset, field) |> String.downcase()
+    [normalized_field] = ~w(normalized_#{field})a
 
     changeset
-    |> put_change(:email, String.downcase(email))
+    |> put_change(normalized_field, String.downcase(field_value))
   end
 
   def valid_password?(%User{hashed_password: hashed_password}, password)

@@ -13,7 +13,7 @@ defmodule WorldLinkWeb.UserView do
     %{
       id: user.id,
       name: user.name,
-      nickname: user.nickname,
+      username: user.username,
       email: user.email,
       activated: user.activated,
       inserted_at: user.inserted_at,
@@ -25,12 +25,11 @@ defmodule WorldLinkWeb.UserView do
     %{
       id: user.id,
       name: user.name,
-      nickname: user.nickname,
+      username: user.username,
       email: user.email,
       activated: user.activated,
       inserted_at: user.inserted_at,
       updated_at: user.updated_at
     }
   end
-
 end

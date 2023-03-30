@@ -62,13 +62,15 @@ defmodule WorldLink.MixProject do
       {:ecto_psql_extras, "~> 0.6"},
       {:ueberauth, "~> 0.7"},
       {:ueberauth_discord, "~> 0.6"},
+      {:ueberauth_facebook, "~> 0.8"},
       {:argon2_elixir, "~> 3.0"},
       {:uuid, "~> 1.1"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:faker, "~> 0.17", only: [:dev, :test]},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:stripity_stripe, "~> 2.17"},
-      {:ecto_ulid_next, "~> 1.0"}
+      {:ecto_ulid_next, "~> 1.0"},
+      {:guardian, "~> 2.3"}
     ]
   end
 

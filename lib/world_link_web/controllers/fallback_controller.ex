@@ -21,4 +21,11 @@ defmodule WorldLinkWeb.FallbackController do
     |> put_view(WorldLinkWeb.ErrorView)
     |> render(:"404")
   end
+
+  def call(conn, {:error, :unauthenticated}) do
+    conn
+    |> put_status(:unauthorized)
+    |> put_view(WorldLinkWeb.ErrorView)
+    |> render(:"401")
+  end
 end

@@ -23,6 +23,11 @@ config :world_link, WorldLinkWeb.Endpoint,
   pubsub_server: WorldLink.PubSub,
   live_view: [signing_salt: "UdqkcrYi"]
 
+# Configures Guardian
+config :world_link, WorldLinkWeb.Authentication.Guardian,
+  issuer: "world_link",
+  secret_key: "RtII21elWJmCKDCIHO4os3x2Mc4mDJGqnwIbsc/EQvmpWPOYcDL6DL06U6NLsvR4"
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
@@ -62,6 +67,11 @@ config :ueberauth, Ueberauth,
          #  default_scope: "identify connections email guilds",
          default_scope: "email",
          prompt: "none"
+       ]},
+    facebook:
+      {Ueberauth.Strategy.Facebook,
+       [
+         default_scope: "email,public_profile"
        ]}
   ]
 
@@ -73,6 +83,10 @@ config :ueberauth, Ueberauth,
 config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
   client_id: "1080413348081958922",
   client_secret: "384DtQlPrie0fjvLy6jpk73Opm34bHI3"
+
+config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
+  client_id: "943252580360716",
+  client_secret: "2b570e7a587af6069b1bce4dbeb5a411"
 
 # Configuration for Stripe
 

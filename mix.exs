@@ -7,7 +7,7 @@ defmodule WorldLink.MixProject do
       version: "0.1.0",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [] ++ Mix.compilers(),
+      compilers: [] ++ Mix.compilers() ++ [:phoenix_swagger],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
@@ -70,7 +70,9 @@ defmodule WorldLink.MixProject do
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:stripity_stripe, "~> 2.17"},
       {:ecto_ulid_next, "~> 1.0"},
-      {:guardian, "~> 2.3"}
+      {:guardian, "~> 2.3"},
+      {:phoenix_swagger, "~> 0.8"},
+      {:ex_json_schema, "~> 0.5"}
     ]
   end
 

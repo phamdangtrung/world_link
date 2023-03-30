@@ -1,5 +1,6 @@
 defmodule WorldLinkWeb.Router do
   use WorldLinkWeb, :router
+  alias PhoenixSwagger.Plug.Validate
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -8,12 +9,12 @@ defmodule WorldLinkWeb.Router do
     plug :put_root_layout, {WorldLinkWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    # plug :fetch_current_user
     plug WorldLinkWeb.Locale, "en"
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    # plug(Validate, validation_failed_status: 422)
   end
 
   pipeline :auth do
@@ -44,9 +45,16 @@ defmodule WorldLinkWeb.Router do
 
   # Other scopes may use custom stacks.
   scope "/api", WorldLinkWeb do
-    pipe_through [:api, :auth, :admin]
+    pipe_through :api
 
-    get "/users", UserController, :index
+    scope "/users" do
+      pipe_through [:auth, :admin]
+      get "/", UserController, :index
+    end
+  end
+
+  scope "/api/swagger" do
+    forward("/", PhoenixSwagger.Plug.SwaggerUI, otp_app: :world_link, swagger_file: "swagger.json")
   end
 
   # Enables LiveDashboard only for development
@@ -80,6 +88,24 @@ defmodule WorldLinkWeb.Router do
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
+
+  def swagger_info do
+    %{
+      info: %{
+        version: "1.0",
+        title: "World Link API",
+        basePath: "/api"
+      },
+      securityDefinitions: %{
+        Bearer: %{
+          type: "apiKey",
+          name: "Authorization",
+          in: "header"
+        }
+      }
+    }
+  end
+
 
   ## Authentication routes
 

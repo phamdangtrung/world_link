@@ -100,15 +100,33 @@ defmodule WorldLink.Identity do
       {:ok, %{user: user, oauth_profile: _}} ->
         {:ok, user}
 
-      {:error, :user} ->
-        {:error, "An error occurred when trying to register this user."}
+      {:error, :user, changeset, _} ->
+        {:error, :user, changeset}
 
-      {:error, :oauth_profile} ->
-        {:error, "An error occurred when trying to register an oauth profile for this user."}
+      {:error, :oauth_profile, changeset, _} ->
+        {:error, :oauth_profile, changeset}
 
-      {:error, _} ->
+      {:error, _, _, _} ->
         {:error, "An unknown error."}
     end
+  end
+
+  @doc """
+  Assigns an %OauthProfile{} to an existing %User{}.
+
+  ## Examples
+
+      iex> assign_oauth_profile(%User{}, attrs)
+      {:ok, %OauthProfile{}}
+
+      iex> assign_oauth_profile(%User{}, attrs)
+      {:error, changeset
+
+  """
+
+  def assign_oauth_profile(%User{} = user, attrs \\ %{}) do
+    OauthProfile.registration_changeset(user, attrs)
+    |> Repo.insert()
   end
 
   @doc """

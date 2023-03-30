@@ -87,11 +87,24 @@ defmodule WorldLink.Identity.User do
   end
 
   defp normalize(changeset, field) when is_atom(field) do
-    field_value = get_change(changeset, field) |> String.downcase()
+    field_value = get_change(changeset, field)
+
+    normalize_field(changeset, field, field_value)
+  end
+
+  defp normalize_field(changeset, field, field_value) when not is_nil(field_value) do
+    normalized_value = field_value |> String.downcase()
     [normalized_field] = ~w(normalized_#{field})a
 
     changeset
-    |> put_change(normalized_field, String.downcase(field_value))
+    |> put_change(normalized_field, normalized_value)
+  end
+
+  defp normalize_field(changeset, field, _) do
+    [normalized_field] = ~w(normalized_#{field})a
+
+    changeset
+    |> add_error(normalized_field, "is invalid")
   end
 
   def valid_password?(%User{hashed_password: hashed_password}, password)

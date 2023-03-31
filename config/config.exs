@@ -75,6 +75,18 @@ config :ueberauth, Ueberauth,
        ]}
   ]
 
+# PhoenixSwagger configuration
+
+config :world_link, :phoenix_swagger,
+  swagger_files: %{
+    "priv/static/swagger.json" => [
+      router: WorldLinkWeb.Router,     # phoenix routes will be converted to swagger paths
+      endpoint: WorldLinkWeb.Endpoint  # (optional) endpoint config used to set host, port and https schemes.
+    ]
+  }
+
+config :phoenix_swagger, json_library: Jason
+
 # Strategy provider configuration
 # config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
 #   client_id: System.get_env("DISCORD_CLIENT_ID"),

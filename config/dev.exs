@@ -20,6 +20,13 @@ config :world_link, WorldLinkWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {0, 0, 0, 0}, port: 4000],
+  # https: [
+  #   ip: {0, 0, 0, 0},
+  #   port: 4001,
+  #   cipher_suite: :strong,
+  #   certfile: "priv/cert/selfsigned.pem",
+  #   keyfile: "priv/cert/selfsigned_key.pem"
+  # ],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
@@ -52,6 +59,8 @@ config :world_link, WorldLinkWeb.Endpoint,
 # If desired, both `http:` and `https:` keys can be
 # configured to run both http and https servers on
 # different ports.
+
+
 
 # Watch static and templates for browser reloading.
 config :world_link, WorldLinkWeb.Endpoint,

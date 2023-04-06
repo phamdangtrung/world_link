@@ -60,8 +60,6 @@ config :world_link, WorldLinkWeb.Endpoint,
 # configured to run both http and https servers on
 # different ports.
 
-
-
 # Watch static and templates for browser reloading.
 config :world_link, WorldLinkWeb.Endpoint,
   live_reload: [

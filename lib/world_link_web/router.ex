@@ -106,7 +106,6 @@ defmodule WorldLinkWeb.Router do
     }
   end
 
-
   ## Authentication routes
 
   # scope "/", WorldLinkWeb do

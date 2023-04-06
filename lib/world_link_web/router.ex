@@ -1,6 +1,6 @@
 defmodule WorldLinkWeb.Router do
   use WorldLinkWeb, :router
-  alias PhoenixSwagger.Plug.Validate
+  # alias PhoenixSwagger.Plug.Validate
 
   pipeline :browser do
     plug :accepts, ["html"]

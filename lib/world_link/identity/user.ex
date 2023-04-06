@@ -3,8 +3,12 @@ defmodule WorldLink.Identity.User do
 
   use WorldLink.Schema
   import Ecto.Changeset
+  import Ecto
 
   alias WorldLink.Identity.{User, OauthProfile}
+  alias WorldLink.Worlds.{World, Character}
+
+  @required_fields [:email, :name, :username, :password]
 
   schema "users" do
     field :activated, :boolean, default: false
@@ -19,12 +23,14 @@ defmodule WorldLink.Identity.User do
     field :role_name, Ecto.Enum, values: [:user, :admin]
 
     has_many :oauth_profiles, OauthProfile
+    has_many :worlds, World
+    has_many :characters, Character
     timestamps()
   end
 
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:username, :name, :email, :password])
+    |> cast(attrs, @required_fields)
     |> validate_name()
     |> validate_username()
     |> validate_email()
@@ -122,5 +128,17 @@ defmodule WorldLink.Identity.User do
       |> DateTime.truncate(:second)
 
     change(user, activated_at: now, activated: true)
+  end
+
+  def changeset_create_a_world(user, world_attrs) do
+    user
+    |> build_assoc(:worlds)
+    |> World.world_changeset(world_attrs)
+  end
+
+  def changeset_create_a_character(user, character_attrs) do
+    user
+    |> build_assoc(:characters)
+    |> Character.character_changeset(character_attrs)
   end
 end

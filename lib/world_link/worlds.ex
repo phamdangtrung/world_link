@@ -60,55 +60,6 @@ defmodule WorldLink.Worlds do
     Enum.each(character_ids, &assign_a_character_to_a_world(world_id, &1))
   end
 
-  @doc """
-  An alternative to:
-  def assign_a_character_to_a_world(world_id, character_id) do
-    retrieve_world_and_character = fn repo, _ ->
-      with %World{} = world <- repo.get(World, world_id),
-           %Character{} = character <- repo.get(Character, character_id) do
-        {:ok, {world, character}}
-      else
-        %Ecto.NoResultsError{} -> {:error, :world_or_character_not_found}
-      end
-    end
-
-    assign_character_to_world = fn repo, %{retrieve_world_and_character: {world, character}} ->
-      world
-      |> World.changeset_assign_a_character(%{world_id: world.id, character_id: character.id})
-      |> repo.insert()
-    end
-
-    retrieve_main_bio_and_main_timeline = fn repo, %{assign_character_to_world: %WorldsCharacters{} = worlds_characters} ->
-      with %Timeline{} = timeline <-
-             repo.get_by(Timeline, world_id: worlds_characters.world_id, main: true),
-           %CharacterInfo{} = bio <-
-             repo.get_by(CharacterInfo, character_id: worlds_characters.character_id, main: true) do
-        {:ok, {timeline, bio}}
-      else
-        %Ecto.NoResultsError{} -> {:error, :timeline_or_bio_not_found}
-      end
-    end
-
-    assign_bio_to_timeline = fn repo, %{retrieve_main_bio_and_main_timeline: {timeline, bio}} ->
-      timeline
-      |> Timeline.changeset_assign_a_character_info(%{
-        timeline_id: timeline.id,
-        character_info_id: bio.id
-      })
-      |> repo.insert()
-    end
-
-    batch =
-      Multi.new()
-      |> Multi.run(:retrieve_world_and_character, retrieve_world_and_character)
-      |> Multi.run(:assign_character_to_world, assign_character_to_world)
-      |> Multi.run(:retrieve_main_bio_and_main_timeline, retrieve_main_bio_and_main_timeline)
-      |> Multi.run(:assign_bio_to_timeline, assign_bio_to_timeline)
-
-    batch |> Repo.transaction()
-  end
-  """
-
   def assign_a_character_to_a_world(world_id, character_id) do
     Multi.new()
     |> retrieve_world_and_character({world_id, character_id})
@@ -118,13 +69,36 @@ defmodule WorldLink.Worlds do
     |> Repo.transaction()
   end
 
+  def unassign_a_character_from_a_world(world_id, character_id) do
+    Multi.new()
+    |> retrieve_world_and_character({world_id, character_id})
+    |> Multi.delete_all(
+      :delete_associataed_bio_and_timeline,
+      fn %{
+           retrieve_world_and_character: {world, character}
+         } ->
+        from(tci in TimelinesCharacterInfo,
+          where: tci.world_id == ^world.id and tci.character_id == ^character.id
+        )
+      end
+    )
+    |> Repo.transaction()
+  end
+
   def unassign_a_character_from_a_timeline(timeline_id, bio_id) do
     Multi.new()
     |> retrieve_bio_and_timeline({timeline_id, bio_id})
     |> Multi.delete(:remove_bio_from_timeline, fn %{retrieve_bio_and_timeline: timelines_bio} ->
-      timelines_bio |> IO.inspect()
+      timelines_bio
     end)
     |> Repo.transaction()
+  end
+
+  defp assign_character_to_world(changes) do
+    %{retrieve_world_and_character: {world, character}} = changes
+
+    world
+    |> World.changeset_assign_a_character(%{world_id: world.id, character_id: character.id})
   end
 
   defp retrieve_world_and_character(multi, {world_id, character_id}) do
@@ -137,13 +111,6 @@ defmodule WorldLink.Worlds do
         %Ecto.NoResultsError{} -> {:error, :world_or_character_not_found}
       end
     end)
-  end
-
-  defp assign_character_to_world(changes) do
-    %{retrieve_world_and_character: {world, character}} = changes
-
-    world
-    |> World.changeset_assign_a_character(%{world_id: world.id, character_id: character.id})
   end
 
   defp retrieve_bio_and_timeline(multi, {timeline_id, bio_id}) do

@@ -17,7 +17,7 @@ defmodule WorldLinkWeb.UserView do
       email: user.normalized_email,
       activated: user.activated,
       activated_at: user.activated_at,
-      role_name: user.role_name,
+      role_name: user.role_name
     }
   end
 

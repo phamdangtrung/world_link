@@ -80,8 +80,10 @@ config :ueberauth, Ueberauth,
 config :world_link, :phoenix_swagger,
   swagger_files: %{
     "priv/static/swagger.json" => [
-      router: WorldLinkWeb.Router,     # phoenix routes will be converted to swagger paths
-      endpoint: WorldLinkWeb.Endpoint  # (optional) endpoint config used to set host, port and https schemes.
+      # phoenix routes will be converted to swagger paths
+      router: WorldLinkWeb.Router,
+      # (optional) endpoint config used to set host, port and https schemes.
+      endpoint: WorldLinkWeb.Endpoint
     ]
   }
 

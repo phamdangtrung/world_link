@@ -18,3 +18,11 @@ for _ <- 1..20 do
     password: Faker.Internet.user_name()
   })
 end
+
+user =
+  WorldLink.Identity.create_user(%{
+    name: "Son",
+    username: "sonuser",
+    email: "sonuser@email.com",
+    password: "S@tjsf4ction"
+  })

@@ -72,7 +72,8 @@ defmodule WorldLink.MixProject do
       {:ecto_ulid_next, "~> 1.0"},
       {:guardian, "~> 2.3"},
       {:phoenix_swagger, "~> 0.8"},
-      {:ex_json_schema, "~> 0.5"}
+      {:ex_json_schema, "~> 0.5"},
+      {:dialyxir, "~> 1.2", only: [:dev], runtime: false}
     ]
   end
 

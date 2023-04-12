@@ -35,4 +35,9 @@ defmodule WorldLink.Worlds.Character do
     |> build_assoc(:bio)
     |> CharacterInfo.changeset(bio_attrs)
   end
+
+  def changeset_update_ownership(character, character_id_attr) do
+    character
+    |> cast(character_id_attr, [:user_id])
+  end
 end

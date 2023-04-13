@@ -31,8 +31,6 @@ services:
   db:
     # We use the predefined Postgres image.
     image: postgres:15.2-alpine3.17
-    ports:
-      - 5432:5432
     environment:
       # Set user/password for Postgres.
       POSTGRES_USER: postgres

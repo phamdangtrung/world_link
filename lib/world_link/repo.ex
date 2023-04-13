@@ -7,9 +7,9 @@ defmodule WorldLink.Repo do
     config =
       config
       |> Keyword.put(:username, "postgres")
-      |> Keyword.put(:password, "123")
+      |> Keyword.put(:password, "postgres")
       |> Keyword.put(:database, "wl_development")
-      |> Keyword.put(:hostname, "localhost")
+      |> Keyword.put(:hostname, "db")
       |> Keyword.put(:port, "5432")
 
     {:ok, config}

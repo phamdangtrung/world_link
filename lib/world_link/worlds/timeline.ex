@@ -4,10 +4,12 @@ defmodule WorldLink.Worlds.Timeline do
   import Ecto
   alias WorldLink.Worlds.{World, CharacterInfo, TimelinesCharacterInfo}
 
-  @required_fields [:timeline_name, :main]
+  @required_fields [:name, :main]
   schema "timelines" do
-    field :timeline_name, :string
+    field :name, :string
     field :main, :boolean, default: false
+    field :deleted, :boolean, default: false
+    field :deleted_at, :utc_datetime
 
     belongs_to :world, World
     has_many :timelines_character_info, TimelinesCharacterInfo
@@ -27,7 +29,7 @@ defmodule WorldLink.Worlds.Timeline do
     timeline
     |> cast(attrs, @required_fields)
     |> validate_required(@required_fields)
-    |> validate_length(:timeline_name, min: 5, max: 255)
+    |> validate_length(:name, min: 5, max: 255)
   end
 
   def changeset_assign_a_character_info(timeline, timeline_character_info_attrs) do

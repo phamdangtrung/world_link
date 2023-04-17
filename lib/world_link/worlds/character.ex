@@ -7,6 +7,8 @@ defmodule WorldLink.Worlds.Character do
 
   schema "characters" do
     field :name, :string
+    field :deleted, :boolean, default: false
+    field :deleted_at, :utc_datetime
 
     belongs_to :user, User
     has_many :bio, CharacterInfo

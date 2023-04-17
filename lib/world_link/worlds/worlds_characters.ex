@@ -6,6 +6,9 @@ defmodule WorldLink.Worlds.WorldsCharacters do
   @primary_key false
   @required_fields [:world_id, :character_id]
   schema "worlds_characters" do
+    field :deleted, :boolean, default: false
+    field :deleted_at, :utc_datetime
+
     belongs_to :character, Character
     belongs_to :world, World
   end

@@ -6,7 +6,9 @@ defmodule WorldLink.Worlds.World do
   alias WorldLink.Worlds.{Timeline, Character, World, WorldsCharacters, TimelinesCharacterInfo}
 
   schema "worlds" do
-    field :world_name, :string
+    field :name, :string
+    field :deleted, :boolean, default: false
+    field :deleted_at, :utc_datetime
 
     belongs_to :user, User
     has_many :timelines, Timeline
@@ -26,20 +28,20 @@ defmodule WorldLink.Worlds.World do
   @doc false
   def world_changeset(assoc_changeset, world_attrs) do
     assoc_changeset
-    |> cast(world_attrs, [:world_name])
-    |> validate_required([:world_name])
-    |> validate_length(:world_name, min: 5, max: 255)
+    |> cast(world_attrs, [:name])
+    |> validate_required([:name])
+    |> validate_length(:name, min: 5, max: 255)
   end
 
   def changeset_update_characters(%World{} = world, characters) do
     world
-    |> cast(%{}, [:world_name])
+    |> cast(%{}, [:name])
     |> put_assoc(:characters, characters)
   end
 
   def changeset_update_timelines(%World{} = world, timelines) do
     world
-    |> cast(%{}, [:timeline_name])
+    |> cast(%{}, [:name])
     |> put_assoc(:timelines, timelines)
   end
 

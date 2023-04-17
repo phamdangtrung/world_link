@@ -8,6 +8,8 @@ defmodule WorldLink.Worlds.CharacterInfo do
     field :species, :string, default: "unspecified"
     field :data, :map, default: %{}
     field :main, :boolean, default: false
+    field :deleted, :boolean, default: false
+    field :deleted_at, :utc_datetime
 
     belongs_to :character, Character
     has_many :timelines_character_info, TimelinesCharacterInfo

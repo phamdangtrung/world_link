@@ -3,7 +3,7 @@ defmodule WorldLink.Repo.Migrations.CreateTimelines do
 
   def change do
     create table(:timelines) do
-      add :timeline_name, :string, size: 255, null: false
+      add :name, :string, size: 255, null: false
       add :main, :boolean, default: false
       add :world_id, references(:worlds)
 

@@ -6,6 +6,9 @@ defmodule WorldLink.Worlds.TimelinesCharacterInfo do
   @primary_key false
   @required_fields [:timeline_id, :character_info_id, :character_id, :world_id]
   schema "timelines_character_info" do
+    field :deleted, :boolean, default: false
+    field :deleted_at, :utc_datetime
+
     belongs_to :timeline, Timeline, primary_key: true
     belongs_to :character_info, CharacterInfo, primary_key: true
     belongs_to :character, Character

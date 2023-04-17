@@ -26,7 +26,7 @@ defmodule WorldLink.Worlds do
       :create_main_timeline,
       fn %{world: world} ->
         World.changeset_create_a_timelines(world, %{
-          timeline_name: default_timeline_name,
+          name: default_timeline_name,
           main: true
         })
       end

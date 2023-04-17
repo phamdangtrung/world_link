@@ -24,9 +24,9 @@ defmodule WorldLink.Identity.User do
     field :deleted, :boolean, default: false
     field :deleted_at, :utc_datetime
 
-    has_many :oauth_profiles, OauthProfile
-    has_many :worlds, World
-    has_many :characters, Character
+    has_many :oauth_profiles, OauthProfile, where: [deleted: false]
+    has_many :worlds, World, where: [deleted: false]
+    has_many :characters, Character, where: [deleted: false]
     timestamps()
   end
 

@@ -198,4 +198,41 @@ defmodule WorldLink.Worlds do
       _ -> {:error, :unverified_character}
     end
   end
+
+  def delete_character(character_id, user_id) do
+    delete_time = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    Multi.new()
+    |> Multi.one(
+      :ownership_verification,
+      fn _ ->
+        from(c in Character, where: c.id == ^character_id and c.user_id == ^user_id)
+      end
+    )
+    |> Multi.run(:maybe_cancel, &maybe_cancel?/2)
+    |> Multi.update_all(
+      :unassign_character_from_all_timelines,
+      fn _ ->
+        from(tci in TimelinesCharacterInfo,
+          where: tci.character_id == ^character_id,
+          update: [set: [deleted: true, deleted_at: ^delete_time]]
+        )
+      end,
+      []
+    )
+    |> Multi.update_all(
+      :unassign_character_from_all_worlds,
+      fn _ ->
+        from(wc in WorldsCharacters,
+          where: wc.character_id == ^character_id,
+          update: [set: [deleted: true, deleted_at: ^delete_time]]
+        )
+      end,
+      []
+    )
+    |> Multi.update(:delete_character, fn %{ownership_verification: verified_character} ->
+      Character.changeset_delete_character(verified_character)
+    end)
+    |> Repo.transaction()
+  end
 end

@@ -42,4 +42,9 @@ defmodule WorldLink.Worlds.Character do
     character
     |> cast(character_id_attr, [:user_id])
   end
+
+  def changeset_delete_character(character) do
+    character
+    |> change(%{deleted: true, deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
+  end
 end

@@ -73,7 +73,8 @@ defmodule WorldLink.MixProject do
       {:guardian, "~> 2.3"},
       {:phoenix_swagger, "~> 0.8"},
       {:ex_json_schema, "~> 0.5"},
-      {:dialyxir, "~> 1.2", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.2", only: [:dev], runtime: false},
+      {:ex_machina, "~> 2.7.0", only: :test}
     ]
   end
 

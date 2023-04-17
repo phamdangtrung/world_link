@@ -11,9 +11,9 @@ defmodule WorldLink.Worlds.Character do
     field :deleted_at, :utc_datetime
 
     belongs_to :user, User
-    has_many :bio, CharacterInfo
-    has_many :worlds_characters, WorldsCharacters
-    has_many :timelines_character_info, TimelinesCharacterInfo
+    has_many :bio, CharacterInfo, where: [deleted: false]
+    has_many :worlds_characters, WorldsCharacters, where: [deleted: false]
+    has_many :timelines_character_info, TimelinesCharacterInfo, where: [deleted: false]
 
     many_to_many(
       :worlds,

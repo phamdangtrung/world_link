@@ -12,7 +12,7 @@ defmodule WorldLink.Worlds.Timeline do
     field :deleted_at, :utc_datetime
 
     belongs_to :world, World
-    has_many :timelines_character_info, TimelinesCharacterInfo
+    has_many :timelines_character_info, TimelinesCharacterInfo, where: [deleted: false]
 
     many_to_many(
       :character_info,

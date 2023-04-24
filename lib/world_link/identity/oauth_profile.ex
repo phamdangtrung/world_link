@@ -7,8 +7,10 @@ defmodule WorldLink.Identity.OauthProfile do
   import Ecto.Changeset
   alias WorldLink.Identity.User
 
+  @supported_providers [:discord, :facebook, :twitter, :google]
+
   schema "oauth_profiles" do
-    field :oauth_provider, Ecto.Enum, values: [:discord, :facebook, :twitter, :google]
+    field :oauth_provider, Ecto.Enum, values: @supported_providers
     field :provider_uid, :string
     field :deleted, :boolean, default: false
     field :deleted_at, :utc_datetime
@@ -16,6 +18,8 @@ defmodule WorldLink.Identity.OauthProfile do
     belongs_to :user, User
     timestamps()
   end
+
+  def supported_providers, do: @supported_providers
 
   @doc false
   def registration_changeset(%User{} = user, attrs) do

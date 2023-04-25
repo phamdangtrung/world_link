@@ -4,12 +4,18 @@ defmodule WorldLink.Worlds do
   """
 
   import Ecto.Query, warn: false
-  alias WorldLink.Worlds.WorldsCharacters
-  alias WorldLink.Worlds.TimelinesCharacterInfo
   alias Ecto.Multi
   alias WorldLink.Repo
   alias WorldLink.Identity.User
-  alias WorldLink.Worlds.{World, Timeline, Character, CharacterInfo}
+
+  alias WorldLink.Worlds.{
+    Character,
+    CharacterInfo,
+    Timeline,
+    TimelinesCharacterInfo,
+    World,
+    WorldsCharacters
+  }
 
   def create_a_world(%User{} = user, world_attrs) do
     default_timeline_name = "Main Timeline"
@@ -53,9 +59,8 @@ defmodule WorldLink.Worlds do
   def create_a_character(%User{} = user, character_attrs) do
     Multi.new()
     |> Multi.insert(:character, User.changeset_create_a_character(user, character_attrs))
-    |> Multi.run(:bio, fn repo, %{character: character} ->
+    |> Multi.insert(:bio, fn %{character: character} ->
       Character.changeset_create_main_bio(character, %{main: true})
-      |> repo.insert()
     end)
     |> Repo.transaction()
     |> case do
@@ -76,6 +81,34 @@ defmodule WorldLink.Worlds do
     |> retrieve_main_bio_and_main_timeline()
     |> Multi.insert(:assign_bio_to_timeline, &assign_bio_to_timeline/1)
     |> Repo.transaction()
+    |> case do
+      {:ok,
+       %{
+         retrieve_world_and_character: retrieve_world_and_character,
+         assign_character_to_world: assign_character_to_world,
+         retrieve_main_bio_and_main_timeline: retrieve_main_bio_and_main_timeline,
+         assign_bio_to_timeline: assign_bio_to_timeline
+       }} ->
+        {:ok,
+         %{
+           retrieve_world_and_character: retrieve_world_and_character,
+           assign_character_to_world: assign_character_to_world,
+           retrieve_main_bio_and_main_timeline: retrieve_main_bio_and_main_timeline,
+           assign_bio_to_timeline: assign_bio_to_timeline
+         }}
+
+      {:error, :retrieve_world_and_character, retrieve_world_and_character, _} ->
+        {:error, :retrieve_world_and_character, retrieve_world_and_character}
+
+      {:error, :assign_character_to_world, assign_character_to_world, _} ->
+        {:error, :assign_character_to_world, assign_character_to_world}
+
+      {:error, :retrieve_main_bio_and_main_timeline, retrieve_main_bio_and_main_timeline, _} ->
+        {:error, :retrieve_main_bio_and_main_timeline, retrieve_main_bio_and_main_timeline}
+
+      {:error, :assign_bio_to_timeline, assign_bio_to_timeline, _} ->
+        {:error, :assign_bio_to_timeline, assign_bio_to_timeline}
+    end
   end
 
   defp retrieve_world_and_character(multi, {world_id, character_id}) do
@@ -139,6 +172,20 @@ defmodule WorldLink.Worlds do
       end
     )
     |> Repo.transaction()
+    |> case do
+      {:ok,
+       %{
+         retrieve_world_and_character: _retrieve_world_and_character,
+         delete_associated_bio_and_timeline: _delete_associated_bio_and_timeline
+       }} ->
+        {:ok, :character_unassigned_from_world}
+
+      {:error, :retrieve_world_and_character, retrieve_world_and_character, _} ->
+        {:error, :retrieve_world_and_character, retrieve_world_and_character}
+
+      {:error, :delete_associated_bio_and_timeline, delete_associated_bio_and_timeline, _} ->
+        {:error, :delete_associated_bio_and_timeline, delete_associated_bio_and_timeline}
+    end
   end
 
   def unassign_a_character_from_a_timeline(timeline_id, bio_id) do
@@ -148,6 +195,20 @@ defmodule WorldLink.Worlds do
       timelines_bio
     end)
     |> Repo.transaction()
+    |> case do
+      {:ok,
+       %{
+         retrieve_bio_and_timeline: _retrieve_bio_and_timeline,
+         remove_bio_from_timeline: _remove_bio_from_timeline
+       }} ->
+        {:ok, :character_unassigned_from_timeline}
+
+      {:error, :retrieve_bio_and_timeline, retrieve_bio_and_timeline, _} ->
+        {:error, :retrieve_bio_and_timeline, retrieve_bio_and_timeline}
+
+      {:error, :remove_bio_from_timeline, remove_bio_from_timeline, _} ->
+        {:error, :remove_bio_from_timeline, remove_bio_from_timeline}
+    end
   end
 
   defp assign_character_to_world(changes) do
@@ -176,7 +237,6 @@ defmodule WorldLink.Worlds do
     |> Multi.one(:ownership_verification, fn _ ->
       from(c in Character, where: c.id == ^character_id and c.user_id == ^sender_id)
     end)
-    |> Multi.run(:maybe_cancel, &maybe_cancel?/2)
     |> Multi.delete_all(:unassign_character_from_all_timelines, fn _ ->
       from(tci in TimelinesCharacterInfo, where: tci.character_id == ^character_id)
     end)
@@ -187,15 +247,27 @@ defmodule WorldLink.Worlds do
       Character.changeset_update_ownership(verified_character, %{user_id: recipient_id})
     end)
     |> Repo.transaction()
-  end
-
-  defp maybe_cancel?(_, changes) do
-    %{ownership_verification: verified_character} = changes
-
-    verified_character
     |> case do
-      %Character{} = character -> {:ok, character}
-      _ -> {:error, :unverified_character}
+      {:ok,
+       %{
+         ownership_verification: _ownership_verification,
+         unassign_character_from_all_timelines: _unassign_character_from_all_timelines,
+         unassign_character_from_all_worlds: _unassign_character_from_all_worlds,
+         transfer_character: _transfer_character
+       }} ->
+        {:ok, :character_transfered}
+
+      {:error, :ownership_verification, _ownership_verification, _} ->
+        {:error, :ownership_verification}
+
+      {:error, :unassign_character_from_all_timelines, _unassign_character_from_all_timelines, _} ->
+        {:error, :unassign_character_from_all_timelines}
+
+      {:error, :unassign_character_from_all_worlds, _unassign_character_from_all_worlds, _} ->
+        {:error, :unassign_character_from_all_worlds}
+
+      {:error, :transfer_character, _transfer_character, _} ->
+        {:error, :transfer_character}
     end
   end
 
@@ -209,7 +281,6 @@ defmodule WorldLink.Worlds do
         from(c in Character, where: c.id == ^character_id and c.user_id == ^user_id)
       end
     )
-    |> Multi.run(:maybe_cancel, &maybe_cancel?/2)
     |> Multi.update_all(
       :unassign_character_from_all_timelines,
       fn _ ->

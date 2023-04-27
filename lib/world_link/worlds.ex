@@ -62,8 +62,10 @@ defmodule WorldLink.Worlds do
   end
 
   def create_a_timeline(%World{} = world, timeline_attrs) do
-    Repo.insert(World.changeset_create_a_timelines(world, timeline_attrs))
-    |> Repo.transaction()
+    Repo.transaction(fn repo ->
+      World.changeset_create_a_timelines(world, timeline_attrs)
+      |> repo.insert!()
+    end)
     |> case do
       {:ok, timeline} -> {:ok, timeline}
       {:error, message} -> {:error, message}
@@ -78,15 +80,17 @@ defmodule WorldLink.Worlds do
     end)
     |> Repo.transaction()
     |> case do
-      {:ok, %{character: character, bio: bio}} -> {:ok, character, bio}
+      {:ok, %{character: character, bio: bio}} -> {:ok, %{character: character, bio: bio}}
       {:error, :character, character_changeset, _} -> {:error, :character, character_changeset}
       {:error, :bio, bio_changeset, _} -> {:error, :bio, bio_changeset}
     end
   end
 
   def create_a_character_bio(%User{} = user, character_info_attrs) do
-    Repo.insert(Character.changeset_create_bio(user, character_info_attrs))
-    |> Repo.transaction()
+    Repo.transaction(fn repo ->
+      Character.changeset_create_bio(user, character_info_attrs)
+      |> repo.insert!()
+    end)
     |> case do
       {:ok, character_info} -> {:ok, character_info}
       {:error, message} -> {:error, message}
@@ -98,11 +102,12 @@ defmodule WorldLink.Worlds do
   end
 
   def assign_a_character_to_a_world(world, character) do
-    Repo.insert(
-      world
-      |> World.changeset_assign_a_character(%{world_id: world.id, character_id: character.id})
-    )
-    |> Repo.transaction()
+    Repo.transaction(fn repo ->
+      repo.insert!(
+        world
+        |> World.changeset_assign_a_character(%{world_id: world.id, character_id: character.id})
+      )
+    end)
     |> case do
       {:ok, world_character} -> {:ok, world_character}
       {:error, message} -> {:error, message}
@@ -110,11 +115,20 @@ defmodule WorldLink.Worlds do
   end
 
   def assign_a_character_info_to_a_timeline(timeline, character_info) do
-    Repo.insert(
-      timeline
-      |> Timeline.changeset_assign_a_character_info(character_info)
-    )
-    |> Repo.transaction()
+    timeline = timeline |> Repo.preload(:world)
+    character_info = character_info |> Repo.preload(:character)
+
+    Repo.transaction(fn repo ->
+      repo.insert!(
+        timeline
+        |> Timeline.changeset_assign_a_character_info(%{
+          timeline_id: timeline.id,
+          character_info_id: character_info.id,
+          character_id: character_info.character.id,
+          world_id: timeline.world.id
+        })
+      )
+    end)
     |> case do
       {:ok, timelines_character_info} -> {:ok, timelines_character_info}
       {:error, message} -> {:error, message}
@@ -122,11 +136,12 @@ defmodule WorldLink.Worlds do
   end
 
   def update_main_timeline(world, timeline) do
-    world
-    |> preload(:main_timeline)
-    |> World.changeset_update_main_timeline(timeline)
-    |> Repo.update()
-    |> Repo.transaction()
+    Repo.transaction(fn repo ->
+      world
+      |> preload(:main_timeline)
+      |> World.changeset_update_main_timeline(timeline)
+      |> repo.update!()
+    end)
     |> case do
       {:ok, world} -> {:ok, world}
       {:error, changeset} -> {:error, changeset}
@@ -134,10 +149,11 @@ defmodule WorldLink.Worlds do
   end
 
   def update_a_world(world, new_world_attrs) do
-    world
-    |> World.world_changeset(new_world_attrs)
-    |> Repo.update()
-    |> Repo.transaction()
+    Repo.transaction(fn repo ->
+      world
+      |> World.world_changeset(new_world_attrs)
+      |> repo.update!()
+    end)
     |> case do
       {:ok, updated_world} -> {:ok, updated_world}
       {:error, changeset} -> {:error, changeset}
@@ -145,10 +161,11 @@ defmodule WorldLink.Worlds do
   end
 
   def update_a_character(character, new_character_attrs) do
-    character
-    |> Character.character_changeset(new_character_attrs)
-    |> Repo.update()
-    |> Repo.transaction()
+    Repo.transaction(fn repo ->
+      character
+      |> Character.character_changeset(new_character_attrs)
+      |> repo.update!()
+    end)
     |> case do
       {:ok, updated_character} -> {:ok, updated_character}
       {:error, changeset} -> {:error, changeset}
@@ -156,10 +173,11 @@ defmodule WorldLink.Worlds do
   end
 
   def update_a_character_info(character_info, new_character_info_attrs) do
-    character_info
-    |> CharacterInfo.changeset(new_character_info_attrs)
-    |> Repo.update()
-    |> Repo.transaction()
+    Repo.transaction(fn repo ->
+      character_info
+      |> CharacterInfo.changeset(new_character_info_attrs)
+      |> repo.update!()
+    end)
     |> case do
       {:ok, updated_character_info} -> {:ok, updated_character_info}
       {:error, changeset} -> {:error, changeset}
@@ -167,10 +185,11 @@ defmodule WorldLink.Worlds do
   end
 
   def update_a_timeline(timeline, new_timeline_attrs) do
-    timeline
-    |> Timeline.timeline_changeset(new_timeline_attrs)
-    |> Repo.update()
-    |> Repo.transaction()
+    Repo.transaction(fn repo ->
+      timeline
+      |> Timeline.timeline_changeset(new_timeline_attrs)
+      |> repo.update()
+    end)
     |> case do
       {:ok, updated_timeline} -> {:ok, updated_timeline}
       {:error, changeset} -> {:error, changeset}

@@ -1,7 +1,7 @@
 defmodule WorldLink.Worlds.WorldsCharacters do
   use WorldLink.Schema
   import Ecto.Changeset
-  alias WorldLink.Worlds.{World, Character}
+  alias WorldLink.Worlds.{Character, World}
 
   @primary_key false
   @required_fields [:world_id, :character_id]
@@ -19,5 +19,10 @@ defmodule WorldLink.Worlds.WorldsCharacters do
     |> validate_required(@required_fields)
     |> unsafe_validate_unique(@required_fields, WorldLink.Repo)
     |> unique_constraint(@required_fields)
+  end
+
+  def changeset_delete_worlds_characters(worlds_characters) do
+    worlds_characters
+    |> change(%{deleted: true, deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
   end
 end

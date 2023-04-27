@@ -3,16 +3,15 @@ defmodule WorldLink.Worlds.CharacterInfo do
   import Ecto.Changeset
   alias WorldLink.Worlds.{Character, Timeline, TimelinesCharacterInfo}
 
-  @required_fields [:species, :data, :main]
+  @required_fields [:species, :data]
   schema "character_info" do
-    field :species, :string, default: "unspecified"
-    field :data, :map, default: %{}
-    field :main, :boolean, default: false
-    field :deleted, :boolean, default: false
-    field :deleted_at, :utc_datetime
+    field(:species, :string, default: "unspecified")
+    field(:data, :map, default: %{})
+    field(:deleted, :boolean, default: false)
+    field(:deleted_at, :utc_datetime)
 
-    belongs_to :character, Character
-    has_many :timelines_character_info, TimelinesCharacterInfo, where: [deleted: false]
+    belongs_to(:character, Character)
+    has_many(:timelines_character_info, TimelinesCharacterInfo, where: [deleted: false])
 
     many_to_many(
       :timelines,
@@ -29,5 +28,10 @@ defmodule WorldLink.Worlds.CharacterInfo do
     |> cast(bio_attrs, @required_fields)
     |> validate_required(@required_fields)
     |> validate_length(:species, min: 3, max: 255)
+  end
+
+  def changeset_delete_character_info(character_info) do
+    character_info
+    |> change(%{deleted: true, deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
   end
 end

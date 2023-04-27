@@ -32,7 +32,7 @@ defmodule WorldLink.Worlds.Character do
     |> validate_length(:name, min: 5, max: 255)
   end
 
-  def changeset_create_main_bio(character, bio_attrs) do
+  def changeset_create_bio(character, bio_attrs) do
     character
     |> build_assoc(:bio)
     |> CharacterInfo.changeset(bio_attrs)

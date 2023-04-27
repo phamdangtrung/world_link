@@ -3,10 +3,9 @@ defmodule WorldLink.Repo.Migrations.AddTableCharacterInfo do
 
   def change do
     create table(:character_info) do
-      add :species, :string, size: 255
-      add :data, :map, null: false, default: %{}
-      add :main, :boolean, default: false
-      add :character_id, references(:characters)
+      add(:species, :string, size: 255)
+      add(:data, :map, null: false, default: %{})
+      add(:character_id, references(:characters))
 
       timestamps()
     end

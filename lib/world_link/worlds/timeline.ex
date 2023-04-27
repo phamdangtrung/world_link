@@ -2,12 +2,11 @@ defmodule WorldLink.Worlds.Timeline do
   use WorldLink.Schema
   import Ecto.Changeset
   import Ecto
-  alias WorldLink.Worlds.{World, CharacterInfo, TimelinesCharacterInfo}
+  alias WorldLink.Worlds.{CharacterInfo, TimelinesCharacterInfo, World}
 
-  @required_fields [:name, :main]
+  @required_fields [:name]
   schema "timelines" do
     field :name, :string
-    field :main, :boolean, default: false
     field :deleted, :boolean, default: false
     field :deleted_at, :utc_datetime
 
@@ -36,5 +35,10 @@ defmodule WorldLink.Worlds.Timeline do
     timeline
     |> build_assoc(:timelines_character_info)
     |> TimelinesCharacterInfo.changeset(timeline_character_info_attrs)
+  end
+
+  def changeset_delete_timeline(timeline) do
+    timeline
+    |> change(%{deleted: true, deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
   end
 end

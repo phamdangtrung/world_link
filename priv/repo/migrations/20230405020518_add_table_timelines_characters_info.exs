@@ -17,7 +17,7 @@ defmodule WorldLink.Repo.Migrations.AddTableTimelinesCharacterInfo do
     create index(:timelines_character_info, [:character_info_id])
 
     create unique_index(:timelines_character_info, [:timeline_id, :character_info_id],
-             name: :timeline_idcharacter_info_id_unique_index
+             name: :timeline_id_character_info_id_unique_index
            )
   end
 end

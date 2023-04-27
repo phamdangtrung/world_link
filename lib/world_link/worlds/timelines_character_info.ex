@@ -22,4 +22,9 @@ defmodule WorldLink.Worlds.TimelinesCharacterInfo do
     |> unsafe_validate_unique(@required_fields, WorldLink.Repo)
     |> unique_constraint(@required_fields)
   end
+
+  def changeset_delete_timelines_character_info(timelines_character_info) do
+    timelines_character_info
+    |> change(%{deleted: true, deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
+  end
 end

@@ -30,26 +30,40 @@ defmodule WorldLink.Worlds do
     )
     |> Multi.insert(
       :create_main_timeline,
-      fn %{world: world} ->
+      fn %{create_a_world: world} ->
         World.changeset_create_a_timelines(world, %{
-          name: default_timeline_name,
-          main: true
+          name: default_timeline_name
         })
+      end
+    )
+    |> Multi.update(
+      :update_main_timeline,
+      fn %{create_a_world: world, create_main_timeline: timeline} ->
+        world
+        |> Repo.preload(:main_timeline)
+        |> World.changeset_update_main_timeline(timeline)
       end
     )
     |> Repo.transaction()
     |> case do
-      {:ok, %{world: world, timeline: timeline}} -> {:ok, world, timeline}
-      {:error, :world, world_changeset, _} -> {:error, :world, world_changeset}
-      {:error, :timeline, timeline_changeset, _} -> {:error, :timeline, timeline_changeset}
+      {:ok,
+       %{create_a_world: _new_world, create_main_timeline: _timeline, update_main_timeline: world}} ->
+        {:ok, world}
+
+      {:error, :create_a_world, world_changeset, _} ->
+        {:error, :create_a_world, world_changeset}
+
+      {:error, :create_main_timeline, timeline_changeset, _} ->
+        {:error, :create_main_timeline, timeline_changeset}
+
+      {:error, :update_main_timeline, update_main_timeline_changeset, _} ->
+        {:error, :update_main_timeline, update_main_timeline_changeset}
     end
   end
 
   def create_a_timeline(%World{} = world, timeline_attrs) do
-    Repo.transaction(fn repo ->
-      World.changeset_create_a_timelines(world, timeline_attrs)
-      |> repo.insert()
-    end)
+    Repo.insert(World.changeset_create_a_timelines(world, timeline_attrs))
+    |> Repo.transaction()
     |> case do
       {:ok, timeline} -> {:ok, timeline}
       {:error, message} -> {:error, message}
@@ -60,7 +74,7 @@ defmodule WorldLink.Worlds do
     Multi.new()
     |> Multi.insert(:character, User.changeset_create_a_character(user, character_attrs))
     |> Multi.insert(:bio, fn %{character: character} ->
-      Character.changeset_create_main_bio(character, %{main: true})
+      Character.changeset_create_bio(character, %{})
     end)
     |> Repo.transaction()
     |> case do
@@ -70,130 +84,316 @@ defmodule WorldLink.Worlds do
     end
   end
 
-  def assign_characters_to_a_world(world_id, character_ids) when is_list(character_ids) do
-    Enum.each(character_ids, &assign_a_character_to_a_world(world_id, &1))
+  def create_a_character_bio(%User{} = user, character_info_attrs) do
+    Repo.insert(Character.changeset_create_bio(user, character_info_attrs))
+    |> Repo.transaction()
+    |> case do
+      {:ok, character_info} -> {:ok, character_info}
+      {:error, message} -> {:error, message}
+    end
   end
 
-  def assign_a_character_to_a_world(world_id, character_id) do
+  def assign_characters_to_a_world(world, characters) when is_list(characters) do
+    Enum.each(characters, &assign_a_character_to_a_world(world, &1))
+  end
+
+  def assign_a_character_to_a_world(world, character) do
+    Repo.insert(
+      world
+      |> World.changeset_assign_a_character(%{world_id: world.id, character_id: character.id})
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, world_character} -> {:ok, world_character}
+      {:error, message} -> {:error, message}
+    end
+  end
+
+  def assign_a_character_info_to_a_timeline(timeline, character_info) do
+    Repo.insert(
+      timeline
+      |> Timeline.changeset_assign_a_character_info(character_info)
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, timelines_character_info} -> {:ok, timelines_character_info}
+      {:error, message} -> {:error, message}
+    end
+  end
+
+  def update_main_timeline(world, timeline) do
+    world
+    |> preload(:main_timeline)
+    |> World.changeset_update_main_timeline(timeline)
+    |> Repo.update()
+    |> Repo.transaction()
+    |> case do
+      {:ok, world} -> {:ok, world}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  def update_a_world(world, new_world_attrs) do
+    world
+    |> World.world_changeset(new_world_attrs)
+    |> Repo.update()
+    |> Repo.transaction()
+    |> case do
+      {:ok, updated_world} -> {:ok, updated_world}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  def update_a_character(character, new_character_attrs) do
+    character
+    |> Character.character_changeset(new_character_attrs)
+    |> Repo.update()
+    |> Repo.transaction()
+    |> case do
+      {:ok, updated_character} -> {:ok, updated_character}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  def update_a_character_info(character_info, new_character_info_attrs) do
+    character_info
+    |> CharacterInfo.changeset(new_character_info_attrs)
+    |> Repo.update()
+    |> Repo.transaction()
+    |> case do
+      {:ok, updated_character_info} -> {:ok, updated_character_info}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  def update_a_timeline(timeline, new_timeline_attrs) do
+    timeline
+    |> Timeline.timeline_changeset(new_timeline_attrs)
+    |> Repo.update()
+    |> Repo.transaction()
+    |> case do
+      {:ok, updated_timeline} -> {:ok, updated_timeline}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  def delete_a_world(world) do
+    deletion_time = deletion_time()
+
     Multi.new()
-    |> retrieve_world_and_character({world_id, character_id})
-    |> Multi.insert(:assign_character_to_world, &assign_character_to_world/1)
-    |> retrieve_main_bio_and_main_timeline()
-    |> Multi.insert(:assign_bio_to_timeline, &assign_bio_to_timeline/1)
+    |> Multi.update_all(
+      :delete_associated_timelines_character_info,
+      from(tci in TimelinesCharacterInfo,
+        where: tci.world_id == ^world.id,
+        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+      ),
+      []
+    )
+    |> Multi.update_all(
+      :delete_associated_timelines,
+      from(t in Timeline,
+        where: t.world_id == ^world.id,
+        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+      ),
+      []
+    )
+    |> Multi.update_all(
+      :delete_associated_worlds_characters,
+      from(wc in WorldsCharacters,
+        where: wc.world_id == ^world.id,
+        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+      ),
+      []
+    )
+    |> Multi.update(
+      :delete_world,
+      World.changeset_delete_world(world)
+    )
     |> Repo.transaction()
     |> case do
       {:ok,
        %{
-         retrieve_world_and_character: retrieve_world_and_character,
-         assign_character_to_world: assign_character_to_world,
-         retrieve_main_bio_and_main_timeline: retrieve_main_bio_and_main_timeline,
-         assign_bio_to_timeline: assign_bio_to_timeline
+         delete_associated_timelines_character_info: delete_associated_timelines_character_info,
+         delete_associated_timelines: delete_associated_timelines,
+         delete_associated_worlds_characters: delete_associated_worlds_characters,
+         delete_world: delete_world
        }} ->
         {:ok,
          %{
-           retrieve_world_and_character: retrieve_world_and_character,
-           assign_character_to_world: assign_character_to_world,
-           retrieve_main_bio_and_main_timeline: retrieve_main_bio_and_main_timeline,
-           assign_bio_to_timeline: assign_bio_to_timeline
+           delete_associated_timelines_character_info: delete_associated_timelines_character_info,
+           delete_associated_timelines: delete_associated_timelines,
+           delete_associated_worlds_characters: delete_associated_worlds_characters,
+           delete_world: delete_world
          }}
 
-      {:error, :retrieve_world_and_character, retrieve_world_and_character, _} ->
-        {:error, :retrieve_world_and_character, retrieve_world_and_character}
+      {:error, :delete_associated_timelines_character_info,
+       delete_associated_timelines_character_info, _} ->
+        {:error, :delete_associated_timelines_character_info,
+         delete_associated_timelines_character_info}
 
-      {:error, :assign_character_to_world, assign_character_to_world, _} ->
-        {:error, :assign_character_to_world, assign_character_to_world}
+      {:error, :delete_associated_timelines, delete_associated_timelines, _} ->
+        {:error, :delete_associated_timelines, delete_associated_timelines}
 
-      {:error, :retrieve_main_bio_and_main_timeline, retrieve_main_bio_and_main_timeline, _} ->
-        {:error, :retrieve_main_bio_and_main_timeline, retrieve_main_bio_and_main_timeline}
+      {:error, :delete_associated_worlds_characters, delete_associated_worlds_characters, _} ->
+        {:error, :delete_associated_worlds_characters, delete_associated_worlds_characters}
 
-      {:error, :assign_bio_to_timeline, assign_bio_to_timeline, _} ->
-        {:error, :assign_bio_to_timeline, assign_bio_to_timeline}
+      {:error, :delete_world, delete_world, _} ->
+        {:error, :delete_world, delete_world}
     end
   end
 
-  defp retrieve_world_and_character(multi, {world_id, character_id}) do
-    multi
-    |> Multi.run(:retrieve_world_and_character, fn _, _ ->
-      with %World{} = world <- Repo.get(World, world_id),
-           %Character{} = character <- Repo.get(Character, character_id) do
-        {:ok, {world, character}}
-      else
-        %Ecto.NoResultsError{} -> {:error, :world_or_character_not_found}
-      end
-    end)
-  end
+  def delete_a_timeline(timeline) do
+    deletion_time = deletion_time()
 
-  defp retrieve_main_bio_and_main_timeline(multi) do
-    multi
-    |> Multi.run(
-      :retrieve_main_bio_and_main_timeline,
-      fn _,
-         %{
-           assign_character_to_world: worlds_characters
-         } ->
-        with %Timeline{} = timeline <-
-               Repo.get_by(Timeline, world_id: worlds_characters.world_id, main: true),
-             %CharacterInfo{} = character_info <-
-               Repo.get_by(CharacterInfo, character_id: worlds_characters.character_id, main: true) do
-          {:ok, {timeline, character_info}}
-        else
-          %Ecto.NoResultsError{} -> {:error, :world_or_character_not_found}
-        end
-      end
-    )
-  end
-
-  defp assign_bio_to_timeline(changes) do
-    %{
-      retrieve_main_bio_and_main_timeline: {timeline, bio},
-      retrieve_world_and_character: {world, character}
-    } = changes
-
-    timeline
-    |> Timeline.changeset_assign_a_character_info(%{
-      timeline_id: timeline.id,
-      character_info_id: bio.id,
-      character_id: character.id,
-      world_id: world.id
-    })
-  end
-
-  def unassign_a_character_from_a_world(world_id, character_id) do
     Multi.new()
-    |> retrieve_world_and_character({world_id, character_id})
-    |> Multi.delete_all(
-      :delete_associated_bio_and_timeline,
-      fn %{
-           retrieve_world_and_character: {world, character}
-         } ->
-        from(tci in TimelinesCharacterInfo,
-          where: tci.world_id == ^world.id and tci.character_id == ^character.id
-        )
-      end
+    |> Multi.update_all(
+      :delete_associated_timelines_character_info,
+      from(tci in TimelinesCharacterInfo,
+        where: tci.timeline_id == ^timeline.id,
+        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+      ),
+      []
+    )
+    |> Multi.update(
+      :delete_timeline,
+      Timeline.changeset_delete_timeline(timeline)
     )
     |> Repo.transaction()
     |> case do
       {:ok,
        %{
-         retrieve_world_and_character: _retrieve_world_and_character,
-         delete_associated_bio_and_timeline: _delete_associated_bio_and_timeline
+         delete_associated_timelines_character_info: delete_associated_timelines_character_info,
+         delete_timeline: delete_associated_timelines
        }} ->
-        {:ok, :character_unassigned_from_world}
+        {:ok,
+         %{
+           delete_associated_timelines_character_info: delete_associated_timelines_character_info,
+           delete_timeline: delete_associated_timelines
+         }}
 
-      {:error, :retrieve_world_and_character, retrieve_world_and_character, _} ->
-        {:error, :retrieve_world_and_character, retrieve_world_and_character}
+      {:error, :delete_associated_timelines_character_info,
+       delete_associated_timelines_character_info, _} ->
+        {:error, :delete_associated_timelines_character_info,
+         delete_associated_timelines_character_info}
 
-      {:error, :delete_associated_bio_and_timeline, delete_associated_bio_and_timeline, _} ->
-        {:error, :delete_associated_bio_and_timeline, delete_associated_bio_and_timeline}
+      {:error, :delete_timeline, delete_timeline, _} ->
+        {:error, :delete_timeline, delete_timeline}
     end
   end
 
-  def unassign_a_character_from_a_timeline(timeline_id, bio_id) do
+  def delete_a_character(character) do
+    deletion_time = deletion_time()
+
     Multi.new()
-    |> retrieve_bio_and_timeline({timeline_id, bio_id})
-    |> Multi.delete(:remove_bio_from_timeline, fn %{retrieve_bio_and_timeline: timelines_bio} ->
-      timelines_bio
-    end)
+    |> Multi.update_all(
+      :delete_associated_timelines_character_info,
+      from(tci in TimelinesCharacterInfo,
+        where: tci.character_id == ^character.id,
+        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+      ),
+      []
+    )
+    |> Multi.update_all(
+      :delete_associated_character_info,
+      from(ci in CharacterInfo,
+        where: ci.character_id == ^character.id,
+        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+      ),
+      []
+    )
+    |> Multi.update_all(
+      :delete_associated_worlds_characters,
+      from(wc in WorldsCharacters,
+        where: wc.character_id == ^character.id,
+        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+      ),
+      []
+    )
+    |> Multi.update(
+      :delete_character,
+      Character.changeset_delete_character(character)
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok,
+       %{
+         delete_associated_timelines_character_info: delete_associated_timelines_character_info,
+         delete_associated_character_info: delete_associated_character_info,
+         delete_associated_worlds_characters: delete_associated_worlds_characters,
+         delete_character: delete_character
+       }} ->
+        {:ok,
+         %{
+           delete_associated_timelines_character_info: delete_associated_timelines_character_info,
+           delete_associated_character_info: delete_associated_character_info,
+           delete_associated_worlds_characters: delete_associated_worlds_characters,
+           delete_character: delete_character
+         }}
+
+      {:error, :delete_associated_timelines_character_info,
+       delete_associated_timelines_character_info, _} ->
+        {:error, :delete_associated_timelines_character_info,
+         delete_associated_timelines_character_info}
+
+      {:error, :delete_associated_character_info, delete_associated_character_info, _} ->
+        {:error, :delete_associated_character_info, delete_associated_character_info}
+
+      {:error, :delete_associated_worlds_characters, delete_associated_worlds_characters, _} ->
+        {:error, :delete_associated_worlds_characters, delete_associated_worlds_characters}
+
+      {:error, :delete_timeline, delete_character, _} ->
+        {:error, :delete_timeline, delete_character}
+    end
+  end
+
+  def unassign_a_character_from_a_world(world, character) do
+    deletion_time = deletion_time()
+
+    Multi.new()
+    |> Multi.update_all(
+      :delete_associated_timelines_character_info,
+      from(tci in TimelinesCharacterInfo,
+        where: tci.character_id == ^character.id and tci.world_id == ^world.id,
+        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+      ),
+      []
+    )
+    |> Multi.update(
+      :delete_associated_worlds_characters,
+      from(wc in WorldsCharacters,
+        where: wc.character_id == ^character.id and wc.world_id == ^world.id,
+        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+      ),
+      []
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok,
+       %{
+         delete_associated_timelines_character_info: _delete_associated_timelines_character_info,
+         delete_associated_worlds_characters: _delete_associated_worlds_characters
+       }} ->
+        {:ok, :character_unassigned_from_world}
+
+      {:error, :delete_associated_timelines_character_info,
+       delete_associated_timelines_character_info, _} ->
+        {:error, :delete_associated_timelines_character_info,
+         delete_associated_timelines_character_info}
+
+      {:error, :delete_associated_worlds_characters, delete_associated_worlds_characters, _} ->
+        {:error, :delete_associated_worlds_characters, delete_associated_worlds_characters}
+    end
+  end
+
+  def unassign_a_character_from_a_timeline(timeline, character_info) do
+    deletion_time = deletion_time()
+
+    Repo.update(
+      from(tci in TimelinesCharacterInfo,
+        where: tci.timeline_id == ^timeline.id and tci.character_info_id == ^character_info.id,
+        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+      )
+    )
     |> Repo.transaction()
     |> case do
       {:ok,
@@ -209,27 +409,6 @@ defmodule WorldLink.Worlds do
       {:error, :remove_bio_from_timeline, remove_bio_from_timeline, _} ->
         {:error, :remove_bio_from_timeline, remove_bio_from_timeline}
     end
-  end
-
-  defp assign_character_to_world(changes) do
-    %{retrieve_world_and_character: {world, character}} = changes
-
-    world
-    |> World.changeset_assign_a_character(%{world_id: world.id, character_id: character.id})
-  end
-
-  defp retrieve_bio_and_timeline(multi, {timeline_id, bio_id}) do
-    multi
-    |> Multi.run(
-      :retrieve_bio_and_timeline,
-      fn _, _ ->
-        Repo.get_by(TimelinesCharacterInfo, timeline_id: timeline_id, character_info_id: bio_id)
-        |> case do
-          %TimelinesCharacterInfo{} = timelines_bio -> {:ok, timelines_bio}
-          %Ecto.NoResultsError{} -> {:error, :timeline_or_bio_not_found}
-        end
-      end
-    )
   end
 
   def transfer_character(character_id, sender_id, recipient_id) do
@@ -272,7 +451,7 @@ defmodule WorldLink.Worlds do
   end
 
   def delete_character(character_id, user_id) do
-    delete_time = DateTime.utc_now() |> DateTime.truncate(:second)
+    delete_time = deletion_time()
 
     Multi.new()
     |> Multi.one(
@@ -305,5 +484,9 @@ defmodule WorldLink.Worlds do
       Character.changeset_delete_character(verified_character)
     end)
     |> Repo.transaction()
+  end
+
+  defp deletion_time do
+    DateTime.utc_now() |> DateTime.truncate(:second)
   end
 end

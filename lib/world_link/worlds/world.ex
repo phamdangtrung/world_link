@@ -3,17 +3,24 @@ defmodule WorldLink.Worlds.World do
   import Ecto
   import Ecto.Changeset
   alias WorldLink.Identity.User
-  alias WorldLink.Worlds.{Timeline, Character, World, WorldsCharacters, TimelinesCharacterInfo}
+  alias WorldLink.Worlds.{Character, Timeline, TimelinesCharacterInfo, WorldsCharacters}
 
   schema "worlds" do
-    field :name, :string
-    field :deleted, :boolean, default: false
-    field :deleted_at, :utc_datetime
+    field(:name, :string)
+    field(:deleted, :boolean, default: false)
+    field(:deleted_at, :utc_datetime)
 
-    belongs_to :user, User
-    has_many :timelines, Timeline, where: [deleted: false]
-    has_many :worlds_characters, WorldsCharacters, where: [deleted: false]
-    has_many :timelines_character_info, TimelinesCharacterInfo, where: [deleted: false]
+    belongs_to(:user, User)
+    has_many(:timelines, Timeline, where: [deleted: false])
+
+    has_one(:main_timeline, Timeline,
+      foreign_key: :id,
+      where: [deleted: false],
+      on_replace: :update
+    )
+
+    has_many(:worlds_characters, WorldsCharacters, where: [deleted: false])
+    has_many(:timelines_character_info, TimelinesCharacterInfo, where: [deleted: false])
 
     many_to_many(
       :characters,
@@ -33,22 +40,21 @@ defmodule WorldLink.Worlds.World do
     |> validate_length(:name, min: 5, max: 255)
   end
 
-  def changeset_update_characters(%World{} = world, characters) do
-    world
-    |> cast(%{}, [:name])
-    |> put_assoc(:characters, characters)
-  end
-
-  def changeset_update_timelines(%World{} = world, timelines) do
-    world
-    |> cast(%{}, [:name])
-    |> put_assoc(:timelines, timelines)
-  end
-
   def changeset_create_a_timelines(world, timeline_attrs) do
     world
     |> build_assoc(:timelines)
     |> Timeline.timeline_changeset(timeline_attrs)
+  end
+
+  def changeset_update_main_timeline(world, timeline) do
+    world
+    |> change()
+    |> put_assoc(:main_timeline, timeline)
+  end
+
+  def changeset_delete_world(world) do
+    world
+    |> change(%{deleted: true, deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
   end
 
   def changeset_assign_a_character(world, worlds_characters_attrs) do

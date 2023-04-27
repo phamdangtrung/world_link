@@ -30,8 +30,8 @@ defmodule WorldLink.Worlds.CharacterInfo do
     |> validate_length(:species, min: 3, max: 255)
   end
 
-  def changeset_delete_character_info(character_info) do
+  def changeset_delete_character_info(character_info, deletion_time) do
     character_info
-    |> change(%{deleted: true, deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
+    |> change(%{deleted: true, deleted_at: deletion_time})
   end
 end

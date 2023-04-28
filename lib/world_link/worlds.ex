@@ -28,6 +28,9 @@ defmodule WorldLink.Worlds do
       iex> create_a_world(user, %{name: "a wo"})
       {:error, :create_a_world, %Ecto.Changeset{}}
 
+      iex> create_a_world(nil, %{name: "a whole new world"})
+      {:error, :invalid_params}
+
   """
   def create_a_world(%User{} = user, world_attrs) do
     default_timeline_name = "Main Timeline"
@@ -66,6 +69,8 @@ defmodule WorldLink.Worlds do
         {:error, :create_a_world, world_changeset}
     end
   end
+
+  def create_a_world(_, _), do: {:error, :invalid_params}
 
   @doc """
   Creates a new timeline for a world.
@@ -663,14 +668,14 @@ defmodule WorldLink.Worlds do
   end
 
   @doc """
-  Transfers a character to another user.
+  Marks a character and its associations as deleted and updates [:deleted_at, :updated_at].
 
   ## Examples
 
-      iex> unassign_a_character_from_a_timeline(world, character)
+      iex> delete_character(character)
       :ok
 
-      iex> unassign_a_character_from_a_timeline(world, character)
+      iex> delete_character(character)
       {:error, reason, %Ecto.Changeset{}}
 
   """
@@ -699,6 +704,24 @@ defmodule WorldLink.Worlds do
       Character.changeset_delete_character(character, deletion_time)
     )
     |> Repo.transaction()
+    |> case do
+      {:ok,
+       %{
+         unassign_character_from_all_timelines: _unassign_character_from_all_timelines,
+         unassign_character_from_all_worlds: _unassign_character_from_all_worlds,
+         delete_character: _delete_character
+       }} ->
+        :ok
+
+      {:error, :unassign_character_from_all_timelines, unassign_character_from_all_timelines, _} ->
+        {:error, :unassign_character_from_all_timelines, unassign_character_from_all_timelines}
+
+      {:error, :unassign_character_from_all_worlds, unassign_character_from_all_worlds, _} ->
+        {:error, :unassign_character_from_all_worlds, unassign_character_from_all_worlds}
+
+      {:error, :delete_character, delete_character, _} ->
+        {:error, :delete_character, delete_character}
+    end
   end
 
   defp deletion_time do

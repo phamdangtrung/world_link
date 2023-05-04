@@ -60,8 +60,7 @@ defmodule Support.Factories.WorldsFactory do
   def character_info_factory(attrs) do
     %CharacterInfo{
       species: Faker.Team.creature(),
-      data: %{},
-      main: false
+      data: %{}
     }
     |> merge_attributes(attrs)
     |> evaluate_lazy_attributes()

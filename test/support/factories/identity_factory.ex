@@ -11,7 +11,7 @@ defmodule Support.Factories.IdentityFactory do
     username = sequence("username")
 
     %User{
-      name: "John Doe",
+      name: Faker.Person.name(),
       email: email |> String.downcase(),
       normalized_email: email |> String.downcase(),
       username: username,

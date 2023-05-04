@@ -32,7 +32,7 @@ defmodule WorldLink.Worlds do
       {:error, :invalid_params}
 
   """
-  def create_a_world(%User{} = user, world_attrs) do
+  def create_a_world(%User{} = user, %{} = world_attrs) do
     default_timeline_name = "Main Timeline"
 
     Multi.new()
@@ -62,7 +62,11 @@ defmodule WorldLink.Worlds do
     |> Repo.transaction()
     |> case do
       {:ok,
-       %{create_a_world: _new_world, create_main_timeline: _timeline, update_main_timeline: world}} ->
+       %{
+         create_a_world: _new_world,
+         create_main_timeline: _timeline,
+         update_main_timeline: world
+       }} ->
         {:ok, world}
 
       {:error, :create_a_world, world_changeset, _} ->
@@ -80,20 +84,24 @@ defmodule WorldLink.Worlds do
       iex> create_a_timeline(world, %{name: "a whole new timeline"})
       {:ok, %Timeline{}}
 
-      iex> create_a_timeline(user, %{name: "a wo"})
+      iex> create_a_timeline(world, %{name: "a wo"})
       {:error, %Ecto.Changeset{}}
 
+      iex> create_a_timeline(nil, nil)
+      {:error, :invalid_params}
+
   """
-  def create_a_timeline(%World{} = world, timeline_attrs) do
-    Repo.transaction(fn repo ->
-      World.changeset_create_a_timelines(world, timeline_attrs)
-      |> repo.insert()
-    end)
-    |> case do
-      {:ok, timeline} -> {:ok, timeline}
-      {:error, message} -> {:error, message}
-    end
+  def create_a_timeline(%World{} = world, %{} = timeline_attrs) do
+    {_, {status, result}} =
+      Repo.transaction(fn repo ->
+        World.changeset_create_a_timelines(world, timeline_attrs)
+        |> repo.insert()
+      end)
+
+    {status, result}
   end
+
+  def create_a_timeline(_, _), do: {:error, :invalid_params}
 
   @doc """
   Creates a new character for a user.
@@ -106,8 +114,11 @@ defmodule WorldLink.Worlds do
       iex> create_a_character(user, %{name: "a wo"})
       {:error, :character, %Ecto.Changeset{}}
 
+      iex> create_a_character(nil, nil)
+      {:error, :invalid_params}
+
   """
-  def create_a_character(%User{} = user, character_attrs) do
+  def create_a_character(%User{} = user, %{} = character_attrs) do
     Multi.new()
     |> Multi.insert(:character, User.changeset_create_a_character(user, character_attrs))
     |> Multi.insert(:bio, fn %{character: character} ->
@@ -120,46 +131,57 @@ defmodule WorldLink.Worlds do
     end
   end
 
+  def create_a_character(_, _), do: {:error, :invalid_params}
+
   @doc """
   Creates a new bio for a character.
 
   ## Examples
 
-      iex> create_a_character_bio(user, %{species: "human", data: %{height: 150cm}})
+      iex> create_a_character_bio(character, %{species: "human", data: %{height: 150cm}})
       {:ok, %CharacterInfo{}}
 
-      iex> create_a_character_bio(user, %{species: "aw"})
+      iex> create_a_character_bio(character, %{species: "aw"})
       {:error, %Ecto.Changeset{}}
 
+      iex> create_a_character_bio(nil, %{species: "aw"})
+      {:error, :invalid_params}
+
   """
-  def create_a_character_bio(%User{} = user, character_info_attrs) do
-    Repo.transaction(fn repo ->
-      Character.changeset_create_bio(user, character_info_attrs)
-      |> repo.insert()
-    end)
-    |> case do
-      {:ok, character_info} -> {:ok, character_info}
-      {:error, message} -> {:error, message}
-    end
+  def create_a_character_bio(%Character{} = character, %{} = character_info_attrs) do
+    {_, {status, result}} =
+      Repo.transaction(fn repo ->
+        Character.changeset_create_bio(character, character_info_attrs)
+        |> repo.insert()
+      end)
+
+    {status, result}
   end
+
+  def create_a_character_bio(_, _), do: {:error, :invalid_params}
 
   @doc """
   Assigns a list of characters to a world.
 
   ## Examples
 
-      iex> assign_characters_to_a_world(user, [character_a, character_b])
-      {:ok, [list]}
+      iex> assign_characters_to_a_world(world, [character_a, character_b])
+      [list]
 
-      iex> assign_characters_to_a_world(user, [])
+      iex> assign_characters_to_a_world(world, [])
       {:error, :empty_list}
 
+      iex> assign_characters_to_a_world(world, nil)
+      {:error, :invalid_params}
+
   """
-  def assign_characters_to_a_world(world, characters) when is_list(characters) do
-    {:ok, Enum.map(characters, &assign_a_character_to_a_world(world, &1))}
+  def assign_characters_to_a_world(%World{}, []), do: {:error, :empty_list}
+
+  def assign_characters_to_a_world(%World{} = world, characters) when is_list(characters) do
+    Enum.map(characters, &assign_a_character_to_a_world(world, &1))
   end
 
-  def assign_characters_to_a_world(_world, []), do: {:error, :empty_list}
+  def assign_characters_to_a_world(_, _), do: {:error, :invalid_params}
 
   @doc """
   Assigns a character to a world.
@@ -169,23 +191,26 @@ defmodule WorldLink.Worlds do
       iex> assign_a_character_to_a_world(world, character)
       {:ok, %WorldsCharacters{}}
 
-      iex> assign_a_character_to_a_world(user, [])
+      iex> assign_a_character_to_a_world(world, character)
       {:error, %Ecto.Changeset{}}
 
+      iex> assign_a_character_to_a_world(world, [])
+      {:error, :invalid_params}
+
   """
-  def assign_a_character_to_a_world(world, character) do
-    Repo.transaction(fn repo ->
-      repo.insert(
-        world
-        |> World.changeset_assign_a_character(%{world_id: world.id, character_id: character.id})
-      )
-    end)
-    |> case do
-      {:ok, world_character} -> {:ok, world_character}
-      {:error, message} -> {:error, message}
-      result -> {:error, result}
-    end
+  def assign_a_character_to_a_world(%World{} = world, %Character{} = character) do
+    {_, {status, result}} =
+      Repo.transaction(fn repo ->
+        repo.insert(
+          world
+          |> World.changeset_assign_a_character(%{world_id: world.id, character_id: character.id})
+        )
+      end)
+
+    {status, result}
   end
+
+  def assign_a_character_to_a_world(_, _), do: {:error, :invalid_params}
 
   @doc """
   Assigns a character info to a timeline.
@@ -198,52 +223,77 @@ defmodule WorldLink.Worlds do
       iex> assign_a_character_info_to_a_timeline(timeline, character_info)
       {:error, %Ecto.Changeset{}}
 
+      iex> assign_a_character_info_to_a_timeline(nil, character_info)
+      {:error, :invalid_params}
+
   """
-  def assign_a_character_info_to_a_timeline(timeline, character_info) do
+  def assign_a_character_info_to_a_timeline(
+        %Timeline{} = timeline,
+        %CharacterInfo{} = character_info
+      ) do
     timeline = timeline |> Repo.preload(:world)
     character_info = character_info |> Repo.preload(:character)
 
-    Repo.transaction(fn repo ->
-      repo.insert(
-        timeline
-        |> Timeline.changeset_assign_a_character_info(%{
-          timeline_id: timeline.id,
-          character_info_id: character_info.id,
-          character_id: character_info.character.id,
-          world_id: timeline.world.id
-        })
-      )
-    end)
-    |> case do
-      {:ok, timelines_character_info} -> {:ok, timelines_character_info}
-      {:error, message} -> {:error, message}
-    end
+    {_, {status, result}} =
+      Repo.transaction(fn repo ->
+        repo.insert(
+          timeline
+          |> Timeline.changeset_assign_a_character_info(%{
+            timeline_id: timeline.id,
+            character_info_id: character_info.id,
+            character_id: character_info.character.id,
+            world_id: timeline.world.id
+          })
+        )
+      end)
+
+    {status, result}
   end
+
+  def assign_a_character_info_to_a_timeline(_, _), do: {:error, :invalid_params}
 
   @doc """
   Updates the main timeline of a world.
 
   ## Examples
 
-      iex> update_main_timeline(timeline, character_info)
+      iex> update_main_timeline(world, timeline)
       {:ok, %World{}}
 
-      iex> update_main_timeline(timeline, character_info)
-      {:error, %Ecto.Changeset{}}
+      iex> update_main_timeline(world, timeline)
+      {:error, reason, %Ecto.Changeset{}}
+
+      iex> update_main_timeline(world, nil)
+      {:error, :invalid_params}
 
   """
-  def update_main_timeline(world, timeline) do
-    Repo.transaction(fn repo ->
+  def update_main_timeline(%World{} = world, %Timeline{} = timeline) do
+    Multi.new()
+    |> Multi.update(
+      :remove_current_main_timeline,
       world
-      |> preload(:main_timeline)
+      |> Ecto.Changeset.change(main_timeline_id: nil)
+    )
+    |> Multi.update(
+      :update_main_timeline,
+      world
+      |> Repo.preload(:main_timeline)
       |> World.changeset_update_main_timeline(timeline)
-      |> repo.update()
-    end)
+    )
+    |> Repo.transaction()
     |> case do
-      {:ok, world} -> {:ok, world}
-      {:error, changeset} -> {:error, changeset}
+      {:ok, %{remove_current_main_timeline: _, update_main_timeline: world}} ->
+        {:ok, world}
+
+      {:error, :remove_current_main_timeline, remove_current_main_timeline, _} ->
+        {:error, :remove_current_main_timeline, remove_current_main_timeline}
+
+      {:error, :update_main_timeline, update_main_timeline, _} ->
+        {:error, :update_main_timeline, update_main_timeline}
     end
   end
+
+  def update_main_timeline(_, _), do: {:error, :invalid_params}
 
   @doc """
   Updates attributes of a world.
@@ -256,18 +306,22 @@ defmodule WorldLink.Worlds do
       iex> update_a_world(world, %{name: "aw"})
       {:error, %Ecto.Changeset{}}
 
+      iex> update_a_world(world, nil)
+      {:error, :invalid_params}
+
   """
-  def update_a_world(world, new_world_attrs) do
-    Repo.transaction(fn repo ->
-      world
-      |> World.world_changeset(new_world_attrs)
-      |> repo.update()
-    end)
-    |> case do
-      {:ok, updated_world} -> {:ok, updated_world}
-      {:error, changeset} -> {:error, changeset}
-    end
+  def update_a_world(%World{} = world, %{} = new_world_attrs) do
+    {_, {status, result}} =
+      Repo.transaction(fn repo ->
+        world
+        |> World.world_changeset(new_world_attrs)
+        |> repo.update()
+      end)
+
+    {status, result}
   end
+
+  def update_a_world(_, _), do: {:error, :invalid_params}
 
   @doc """
   Updates attributes of a character.
@@ -280,18 +334,22 @@ defmodule WorldLink.Worlds do
       iex> update_a_character(character, %{name: "aw"})
       {:error, %Ecto.Changeset{}}
 
+      iex> update_a_character(character, %{name: "aw"})
+      {:error, :invalid_params}
+
   """
-  def update_a_character(character, new_character_attrs) do
-    Repo.transaction(fn repo ->
-      character
-      |> Character.character_changeset(new_character_attrs)
-      |> repo.update()
-    end)
-    |> case do
-      {:ok, updated_character} -> {:ok, updated_character}
-      {:error, changeset} -> {:error, changeset}
-    end
+  def update_a_character(%Character{} = character, %{} = new_character_attrs) do
+    {_, {status, result}} =
+      Repo.transaction(fn repo ->
+        character
+        |> Character.character_changeset(new_character_attrs)
+        |> repo.update()
+      end)
+
+    {status, result}
   end
+
+  def update_a_character(_, _), do: {:error, :invalid_params}
 
   @doc """
   Updates attributes of a character info.
@@ -304,18 +362,22 @@ defmodule WorldLink.Worlds do
       iex> update_a_character_info(character_info, %{species: "aw"})
       {:error, %Ecto.Changeset{}}
 
+      iex> update_a_character_info(nil, %{species: "aw"})
+      {:error, :invalid_params}
+
   """
-  def update_a_character_info(character_info, new_character_info_attrs) do
-    Repo.transaction(fn repo ->
-      character_info
-      |> CharacterInfo.changeset(new_character_info_attrs)
-      |> repo.update()
-    end)
-    |> case do
-      {:ok, updated_character_info} -> {:ok, updated_character_info}
-      {:error, changeset} -> {:error, changeset}
-    end
+  def update_a_character_info(%CharacterInfo{} = character_info, %{} = new_character_info_attrs) do
+    {_, {status, result}} =
+      Repo.transaction(fn repo ->
+        character_info
+        |> CharacterInfo.changeset(new_character_info_attrs)
+        |> repo.update()
+      end)
+
+    {status, result}
   end
+
+  def update_a_character_info(_, _), do: {:error, :invalid_params}
 
   @doc """
   Updates attributes of a timeline.
@@ -328,18 +390,22 @@ defmodule WorldLink.Worlds do
       iex> update_a_timeline(timeline, %{name: "aw"})
       {:error, %Ecto.Changeset{}}
 
+      iex> update_a_timeline(timeline, nil)
+      {:error, :invalid_params}
+
   """
-  def update_a_timeline(timeline, new_timeline_attrs) do
-    Repo.transaction(fn repo ->
-      timeline
-      |> Timeline.timeline_changeset(new_timeline_attrs)
-      |> repo.update()
-    end)
-    |> case do
-      {:ok, updated_timeline} -> {:ok, updated_timeline}
-      {:error, changeset} -> {:error, changeset}
-    end
+  def update_a_timeline(%Timeline{} = timeline, %{} = new_timeline_attrs) do
+    {_, {status, result}} =
+      Repo.transaction(fn repo ->
+        timeline
+        |> Timeline.timeline_changeset(new_timeline_attrs)
+        |> repo.update()
+      end)
+
+    {status, result}
   end
+
+  def update_a_timeline(_, _), do: {:error, :invalid_params}
 
   @doc """
   Marks a world and its associated timelines as deleted and updates [:deleted_at, :updated_at].
@@ -352,8 +418,11 @@ defmodule WorldLink.Worlds do
       iex> delete_a_world(world)
       {:error, reason, %Ecto.Changeset{}}
 
+      iex> delete_a_world(nil)
+      {:error, :invalid_params}
+
   """
-  def delete_a_world(world) do
+  def delete_a_world(%World{} = world) do
     deletion_time = deletion_time()
 
     Multi.new()
@@ -361,7 +430,7 @@ defmodule WorldLink.Worlds do
       :delete_associated_timelines_character_info,
       from(tci in TimelinesCharacterInfo,
         where: tci.world_id == ^world.id,
-        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+        update: [set: [deleted: true, deleted_at: ^deletion_time]]
       ),
       []
     )
@@ -377,7 +446,7 @@ defmodule WorldLink.Worlds do
       :delete_associated_worlds_characters,
       from(wc in WorldsCharacters,
         where: wc.world_id == ^world.id,
-        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+        update: [set: [deleted: true, deleted_at: ^deletion_time]]
       ),
       []
     )
@@ -412,6 +481,8 @@ defmodule WorldLink.Worlds do
     end
   end
 
+  def delete_a_world(_), do: {:error, :invalid_params}
+
   @doc """
   Marks a timeline and its associated character info as deleted and updates [:deleted_at, :updated_at].
 
@@ -423,8 +494,11 @@ defmodule WorldLink.Worlds do
       iex> delete_a_timeline(timeline)
       {:error, reason, %Ecto.Changeset{}}
 
+      iex> delete_a_timeline(nil)
+      {:error, :invalid_params}
+
   """
-  def delete_a_timeline(timeline) do
+  def delete_a_timeline(%Timeline{} = timeline) do
     deletion_time = deletion_time()
 
     Multi.new()
@@ -432,7 +506,7 @@ defmodule WorldLink.Worlds do
       :delete_associated_timelines_character_info,
       from(tci in TimelinesCharacterInfo,
         where: tci.timeline_id == ^timeline.id,
-        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+        update: [set: [deleted: true, deleted_at: ^deletion_time]]
       ),
       []
     )
@@ -459,6 +533,8 @@ defmodule WorldLink.Worlds do
     end
   end
 
+  def delete_a_timeline(_), do: {:error, :invalid_params}
+
   @doc """
   Marks a character and its character info as deleted and updates [:deleted_at, :updated_at].
 
@@ -470,8 +546,11 @@ defmodule WorldLink.Worlds do
       iex> delete_a_character(character)
       {:error, reason, %Ecto.Changeset{}}
 
+      iex> delete_a_character(nil)
+      {:error, :invalid_params}
+
   """
-  def delete_a_character(character) do
+  def delete_a_character(%Character{} = character) do
     deletion_time = deletion_time()
 
     Multi.new()
@@ -479,7 +558,7 @@ defmodule WorldLink.Worlds do
       :delete_associated_timelines_character_info,
       from(tci in TimelinesCharacterInfo,
         where: tci.character_id == ^character.id,
-        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+        update: [set: [deleted: true, deleted_at: ^deletion_time]]
       ),
       []
     )
@@ -495,7 +574,7 @@ defmodule WorldLink.Worlds do
       :delete_associated_worlds_characters,
       from(wc in WorldsCharacters,
         where: wc.character_id == ^character.id,
-        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+        update: [set: [deleted: true, deleted_at: ^deletion_time]]
       ),
       []
     )
@@ -530,6 +609,8 @@ defmodule WorldLink.Worlds do
     end
   end
 
+  def delete_a_character(_), do: {:error, :invalid_params}
+
   @doc """
   Unassigns a character from a world and marks its associations as deleted and updates [:deleted_at, :updated_at].
 
@@ -541,8 +622,11 @@ defmodule WorldLink.Worlds do
       iex> unassign_a_character_from_a_world(world, character)
       {:error, reason, %Ecto.Changeset{}}
 
+      iex> unassign_a_character_from_a_world(world, nil)
+      {:error, :invalid_params}
+
   """
-  def unassign_a_character_from_a_world(world, character) do
+  def unassign_a_character_from_a_world(%World{} = world, %Character{} = character) do
     deletion_time = deletion_time()
 
     Multi.new()
@@ -550,16 +634,16 @@ defmodule WorldLink.Worlds do
       :delete_associated_timelines_character_info,
       from(tci in TimelinesCharacterInfo,
         where: tci.character_id == ^character.id and tci.world_id == ^world.id,
-        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+        update: [set: [deleted: true, deleted_at: ^deletion_time]]
       ),
       []
     )
-    |> Multi.update_all(
+    |> Multi.update(
       :delete_associated_worlds_characters,
-      from(wc in WorldsCharacters,
-        where: wc.character_id == ^character.id and wc.world_id == ^world.id,
-        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
-      ),
+      fn _ ->
+        Repo.get_by(WorldsCharacters, world_id: world.id, character_id: character.id)
+        |> WorldsCharacters.changeset_delete_worlds_characters()
+      end,
       []
     )
     |> Repo.transaction()
@@ -567,9 +651,9 @@ defmodule WorldLink.Worlds do
       {:ok,
        %{
          delete_associated_timelines_character_info: _delete_associated_timelines_character_info,
-         delete_associated_worlds_characters: _delete_associated_worlds_characters
+         delete_associated_worlds_characters: delete_associated_worlds_characters
        }} ->
-        :ok
+        {:ok, delete_associated_worlds_characters}
 
       {:error, :delete_associated_timelines_character_info,
        delete_associated_timelines_character_info, _} ->
@@ -580,6 +664,8 @@ defmodule WorldLink.Worlds do
         {:error, :delete_associated_worlds_characters, delete_associated_worlds_characters}
     end
   end
+
+  def unassign_a_character_from_a_world(_, _), do: {:error, :invalid_params}
 
   @doc """
   Unassigns a character from a timeline and marks its associations as deleted and updates [:deleted_at, :updated_at].
@@ -592,23 +678,28 @@ defmodule WorldLink.Worlds do
       iex> unassign_a_character_from_a_timeline(world, character)
       {:error, %Ecto.Changeset{}}
 
-  """
-  def unassign_a_character_from_a_timeline(timeline, character_info) do
-    deletion_time = deletion_time()
+      iex> unassign_a_character_from_a_timeline(world, nil)
+      {:error, :invalid_params}
 
-    Repo.transaction(fn repo ->
-      repo.update(
-        from(tci in TimelinesCharacterInfo,
-          where: tci.timeline_id == ^timeline.id and tci.character_info_id == ^character_info.id,
-          update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+  """
+  def unassign_a_character_from_a_timeline(
+        %Timeline{} = timeline,
+        %CharacterInfo{} = character_info
+      ) do
+    {_, {status, result}} =
+      Repo.transaction(fn repo ->
+        repo.get_by(TimelinesCharacterInfo,
+          timeline_id: timeline.id,
+          character_info_id: character_info.id
         )
-      )
-    end)
-    |> case do
-      {:ok, timelines_character_info} -> {:ok, timelines_character_info}
-      {:error, timelines_character_info_changeset} -> {:error, timelines_character_info_changeset}
-    end
+        |> TimelinesCharacterInfo.changeset_delete_timelines_character_info()
+        |> repo.update()
+      end)
+
+    {status, result}
   end
+
+  def unassign_a_character_from_a_timeline(_, _), do: {:error, :invalid_params}
 
   @doc """
   Transfers a character to another user.
@@ -621,8 +712,11 @@ defmodule WorldLink.Worlds do
       iex> transfer_character(character, recipient)
       {:error, reason, %Ecto.Changeset{}}
 
+      iex> transfer_character(character, nil)
+      {:error, :invalid_params}
+
   """
-  def transfer_character(character, recipient) do
+  def transfer_character(%Character{} = character, %User{} = recipient) do
     deletion_time = deletion_time()
 
     Multi.new()
@@ -630,7 +724,7 @@ defmodule WorldLink.Worlds do
       :unassign_character_from_all_timelines,
       from(tci in TimelinesCharacterInfo,
         where: tci.character_id == ^character.id,
-        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+        update: [set: [deleted: true, deleted_at: ^deletion_time]]
       ),
       []
     )
@@ -638,7 +732,7 @@ defmodule WorldLink.Worlds do
       :unassign_character_from_all_worlds,
       from(wc in WorldsCharacters,
         where: wc.character_id == ^character.id,
-        update: [set: [deleted: true, deleted_at: ^deletion_time, updated_at: ^deletion_time]]
+        update: [set: [deleted: true, deleted_at: ^deletion_time]]
       ),
       []
     )
@@ -667,6 +761,8 @@ defmodule WorldLink.Worlds do
     end
   end
 
+  def transfer_character(_, _), do: {:error, :invalid_params}
+
   @doc """
   Marks a character and its associations as deleted and updates [:deleted_at, :updated_at].
 
@@ -678,8 +774,11 @@ defmodule WorldLink.Worlds do
       iex> delete_character(character)
       {:error, reason, %Ecto.Changeset{}}
 
+      iex> delete_character(nil)
+      {:error, :invalid_params}
+
   """
-  def delete_character(character) do
+  def delete_character(%Character{} = character) do
     deletion_time = deletion_time()
 
     Multi.new()
@@ -723,6 +822,8 @@ defmodule WorldLink.Worlds do
         {:error, :delete_character, delete_character}
     end
   end
+
+  def delete_character(_), do: {:error, :invalid_params}
 
   defp deletion_time do
     DateTime.utc_now() |> DateTime.truncate(:second)

@@ -13,6 +13,8 @@ defmodule WorldLink.Worlds.World do
     belongs_to(:user, User)
     has_many(:timelines, Timeline, where: [deleted: false])
 
+    field(:main_timeline_id, Ecto.ULID)
+
     has_one(:main_timeline, Timeline,
       foreign_key: :id,
       where: [deleted: false],

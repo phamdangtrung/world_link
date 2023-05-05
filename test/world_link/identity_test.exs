@@ -55,6 +55,7 @@ defmodule WorldLink.IdentityTest do
         email: "sam@doe.com",
         avatar: nil
       }
+
       assert {:ok, %User{}} = Identity.create_oauth_user(attrs)
     end
 
@@ -79,8 +80,8 @@ defmodule WorldLink.IdentityTest do
         avatar: nil
       }
 
-      assert {:error, :user, %Ecto.Changeset{}}  = Identity.create_oauth_user(attrs)
-      assert {:error, :oauth_profile, %Ecto.Changeset{}}  = Identity.create_oauth_user(oauth_attrs)
+      assert {:error, :user, %Ecto.Changeset{}} = Identity.create_oauth_user(attrs)
+      assert {:error, :oauth_profile, %Ecto.Changeset{}} = Identity.create_oauth_user(oauth_attrs)
     end
   end
 
@@ -122,12 +123,14 @@ defmodule WorldLink.IdentityTest do
         oauth_provider: :google
       }
 
-      valid_user_attrs = %{
-        email: "sam@doe.com",
-        name: "some name",
-        password: "somepassword",
-        username: "username"
-      } |> Identity.create_user()
+      valid_user_attrs =
+        %{
+          email: "sam@doe.com",
+          name: "some name",
+          password: "somepassword",
+          username: "username"
+        }
+        |> Identity.create_user()
 
       assert {:error, :user_already_exists, %User{}} = Identity.verify_user_existence(attrs)
     end

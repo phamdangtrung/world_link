@@ -7,7 +7,8 @@ defmodule WorldLinkWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_world_link_key",
-    signing_salt: "ZAkAy0AQ"
+    signing_salt: "ZAkAy0AQ",
+    same_site: "Lax"
   ]
 
   socket("/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]])
@@ -20,7 +21,7 @@ defmodule WorldLinkWeb.Endpoint do
     at: "/",
     from: :world_link,
     gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    only: WorldLinkWeb.static_paths()
   )
 
   # Code reloading can be explicitly enabled under the

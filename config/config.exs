@@ -19,7 +19,10 @@ config :world_link,
 # Configures the endpoint
 config :world_link, WorldLinkWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: WorldLinkWeb.ErrorView, accepts: ~w(html json), layout: false],
+  render_errors: [
+    formats: [html: WorldLinkWeb.ErrorHTML, json: WorldLinkWeb.ErrorJSON],
+    layout: false
+  ],
   pubsub_server: WorldLink.PubSub,
   live_view: [signing_salt: "UdqkcrYi"]
 

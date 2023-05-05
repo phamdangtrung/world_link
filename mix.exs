@@ -43,38 +43,41 @@ defmodule WorldLink.MixProject do
   defp deps do
     [
       {:bcrypt_elixir, "~> 3.0"},
-      {:phoenix, "~> 1.6.16"},
+      {:argon2_elixir, "~> 3.0"},
+      {:phoenix, "~> 1.7.0"},
       {:phoenix_ecto, "~> 4.4"},
-      {:ecto_sql, "~> 3.6"},
-      {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.17.5"},
-      {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.6"},
-      {:esbuild, "~> 0.4", runtime: Mix.env() == :dev},
+      {:phoenix_live_view, "~> 0.18.3"},
+      {:phoenix_view, "~> 2.0"},
+      {:uuid, "~> 1.1"},
+      {:ecto_sql, "~> 3.6"},
+      {:ecto_psql_extras, "~> 0.6"},
+      {:ecto_ulid_next, "~> 1.0"},
+      {:postgrex, ">= 0.0.0"},
+      {:floki, ">= 0.30.0", only: :test},
+      {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:ecto_psql_extras, "~> 0.6"},
       {:ueberauth, "~> 0.7"},
       {:ueberauth_discord, "~> 0.6"},
       {:ueberauth_facebook, "~> 0.8"},
-      {:argon2_elixir, "~> 3.0"},
-      {:uuid, "~> 1.1"},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:faker, "~> 0.17", only: [:dev, :test]},
-      {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:stripity_stripe, "~> 2.17"},
-      {:ecto_ulid_next, "~> 1.0"},
       {:guardian, "~> 2.3"},
       {:phoenix_swagger, "~> 0.8"},
       {:ex_json_schema, "~> 0.5"},
       {:dialyxir, "~> 1.2", only: [:dev], runtime: false},
-      {:ex_machina, "~> 2.7.0", only: :test}
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.27", only: :dev, runtime: false},
+      {:faker, "~> 0.17", only: [:dev, :test]},
+      {:ex_machina, "~> 2.7.0", only: :test},
+      {:finch, "~> 0.13"}
     ]
   end
 
@@ -90,7 +93,9 @@ defmodule WorldLink.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.deploy": ["esbuild default --minify", "phx.digest"]
+      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.build": ["tailwind default", "esbuild default"],
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
     ]
   end
 end

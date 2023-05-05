@@ -6,14 +6,14 @@ defmodule WorldLink.Worlds.Character do
   alias WorldLink.Identity.User
 
   schema "characters" do
-    field :name, :string
-    field :deleted, :boolean, default: false
-    field :deleted_at, :utc_datetime
+    field(:name, :string)
+    field(:deleted, :boolean, default: false)
+    field(:deleted_at, :utc_datetime)
 
-    belongs_to :user, User
-    has_many :bio, CharacterInfo, where: [deleted: false]
-    has_many :worlds_characters, WorldsCharacters, where: [deleted: false]
-    has_many :timelines_character_info, TimelinesCharacterInfo, where: [deleted: false]
+    belongs_to(:user, User)
+    has_many(:bio, CharacterInfo, where: [deleted: false])
+    has_many(:worlds_characters, WorldsCharacters, where: [deleted: false])
+    has_many(:timelines_character_info, TimelinesCharacterInfo, where: [deleted: false])
 
     many_to_many(
       :worlds,
@@ -43,8 +43,8 @@ defmodule WorldLink.Worlds.Character do
     |> cast(character_id_attr, [:user_id])
   end
 
-  def changeset_delete_character(character) do
+  def changeset_delete_character(character, deletion_time) do
     character
-    |> change(%{deleted: true, deleted_at: DateTime.utc_now() |> DateTime.truncate(:second)})
+    |> change(%{deleted: true, deleted_at: deletion_time})
   end
 end

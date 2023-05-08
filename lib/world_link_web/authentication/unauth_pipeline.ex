@@ -7,5 +7,5 @@ defmodule WorldLinkWeb.Authentication.UnauthPipeline do
     module: WorldLinkWeb.Authentication.Guardian,
     error_handler: WorldLinkWeb.Authentication.ErrorHandler
 
-  plug Guardian.Plug.EnsureNotAuthenticated
+  plug(Guardian.Plug.EnsureNotAuthenticated)
 end

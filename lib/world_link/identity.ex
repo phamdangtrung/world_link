@@ -5,10 +5,10 @@ defmodule WorldLink.Identity do
 
   import Ecto.Query, warn: false
 
-  alias WorldLink.Repo
   alias Ecto.Multi
-  alias WorldLink.Identity.User
   alias WorldLink.Identity.OauthProfile
+  alias WorldLink.Identity.User
+  alias WorldLink.Repo
 
   @doc """
   Returns the list of users with pagination.
@@ -28,10 +28,11 @@ defmodule WorldLink.Identity do
     %{page: page, page_size: page_size} = Enum.into(opts, defaults)
 
     Repo.all(
-      from users in User,
+      from(users in User,
         select: [:id, :name, :activated, :username, :email],
         limit: ^page_size,
         offset: ^((page - 1) * page_size)
+      )
     )
   end
 

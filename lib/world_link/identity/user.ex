@@ -11,22 +11,22 @@ defmodule WorldLink.Identity.User do
   @required_fields [:email, :name, :username, :password]
 
   schema "users" do
-    field :activated, :boolean, default: false
-    field :activated_at, :utc_datetime
-    field :email, :string
-    field :normalized_email, :string
-    field :name, :string
-    field :username, :string
-    field :normalized_username, :string
-    field :password, :string, virtual: true, redact: true
-    field :hashed_password, :string, redact: true
-    field :role_name, Ecto.Enum, values: [:user, :admin]
-    field :deleted, :boolean, default: false
-    field :deleted_at, :utc_datetime
+    field(:activated, :boolean, default: false)
+    field(:activated_at, :utc_datetime)
+    field(:email, :string)
+    field(:normalized_email, :string)
+    field(:name, :string)
+    field(:username, :string)
+    field(:normalized_username, :string)
+    field(:password, :string, virtual: true, redact: true)
+    field(:hashed_password, :string, redact: true)
+    field(:role_name, Ecto.Enum, values: [:user, :admin])
+    field(:deleted, :boolean, default: false)
+    field(:deleted_at, :utc_datetime)
 
-    has_many :oauth_profiles, OauthProfile, where: [deleted: false]
-    has_many :worlds, World, where: [deleted: false]
-    has_many :characters, Character, where: [deleted: false]
+    has_many(:oauth_profiles, OauthProfile, where: [deleted: false])
+    has_many(:worlds, World, where: [deleted: false])
+    has_many(:characters, Character, where: [deleted: false])
     timestamps()
   end
 

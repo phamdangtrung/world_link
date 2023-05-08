@@ -10,12 +10,12 @@ defmodule WorldLink.Identity.OauthProfile do
   @supported_providers [:discord, :facebook, :twitter, :google]
 
   schema "oauth_profiles" do
-    field :oauth_provider, Ecto.Enum, values: @supported_providers
-    field :provider_uid, :string
-    field :deleted, :boolean, default: false
-    field :deleted_at, :utc_datetime
+    field(:oauth_provider, Ecto.Enum, values: @supported_providers)
+    field(:provider_uid, :string)
+    field(:deleted, :boolean, default: false)
+    field(:deleted_at, :utc_datetime)
 
-    belongs_to :user, User
+    belongs_to(:user, User)
     timestamps()
   end
 

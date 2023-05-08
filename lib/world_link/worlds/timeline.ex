@@ -6,12 +6,12 @@ defmodule WorldLink.Worlds.Timeline do
 
   @required_fields [:name]
   schema "timelines" do
-    field :name, :string
-    field :deleted, :boolean, default: false
-    field :deleted_at, :utc_datetime
+    field(:name, :string)
+    field(:deleted, :boolean, default: false)
+    field(:deleted_at, :utc_datetime)
 
-    belongs_to :world, World
-    has_many :timelines_character_info, TimelinesCharacterInfo, where: [deleted: false]
+    belongs_to(:world, World)
+    has_many(:timelines_character_info, TimelinesCharacterInfo, where: [deleted: false])
 
     many_to_many(
       :character_info,

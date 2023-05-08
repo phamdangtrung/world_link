@@ -1,6 +1,7 @@
 defmodule WorldLinkWeb.UserController do
   use WorldLinkWeb, :controller
   use PhoenixSwagger
+
   alias WorldLink.Identity
   alias WorldLinkWeb.Router.Helpers
 
@@ -19,13 +20,13 @@ defmodule WorldLinkWeb.UserController do
     {page_size, _} = Integer.parse(page_size)
     users = Identity.list_users(page: page, page_size: page_size)
 
-    render(conn, "show.json", users: users)
+    render(conn, :index, users: users)
   end
 
   def index(conn, _params) do
     users = Identity.list_users()
 
-    render(conn, "show.json", users: users)
+    render(conn, :index, users: users)
   end
 
   def swagger_definitions() do

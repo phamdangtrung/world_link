@@ -3,8 +3,6 @@ defmodule WorldLink.IdentityTest do
 
   alias WorldLink.Identity
 
-  @tags [:unit, :user]
-
   describe "Identity functions for %User{}" do
     alias WorldLink.Identity.User
 
@@ -37,10 +35,11 @@ defmodule WorldLink.IdentityTest do
     test "list_users/1" do
       expected =
         WorldLink.Repo.all(
-          from users in User,
+          from(users in User,
             select: [:id, :name, :activated, :username, :email],
             limit: 3,
             offset: 0
+          )
         )
 
       assert expected == Identity.list_users(%{page_size: 3, page: 1})
@@ -123,14 +122,13 @@ defmodule WorldLink.IdentityTest do
         oauth_provider: :google
       }
 
-      valid_user_attrs =
-        %{
-          email: "sam@doe.com",
-          name: "some name",
-          password: "somepassword",
-          username: "username"
-        }
-        |> Identity.create_user()
+      %{
+        email: "sam@doe.com",
+        name: "some name",
+        password: "somepassword",
+        username: "username"
+      }
+      |> Identity.create_user()
 
       assert {:error, :user_already_exists, %User{}} = Identity.verify_user_existence(attrs)
     end

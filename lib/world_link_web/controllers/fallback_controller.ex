@@ -10,7 +10,7 @@ defmodule WorldLinkWeb.FallbackController do
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
     |> put_status(:unprocessable_entity)
-    |> put_view(WorldLinkWeb.ChangesetView)
+    |> put_view(WorldLinkWeb.ChangesetJSON)
     |> render("error.json", changeset: changeset)
   end
 
@@ -18,14 +18,21 @@ defmodule WorldLinkWeb.FallbackController do
   def call(conn, {:error, :not_found}) do
     conn
     |> put_status(:not_found)
-    |> put_view(WorldLinkWeb.ErrorView)
+    |> put_view(WorldLinkWeb.ErrorJSON)
     |> render(:"404")
   end
 
   def call(conn, {:error, :unauthenticated}) do
     conn
     |> put_status(:unauthorized)
-    |> put_view(WorldLinkWeb.ErrorView)
+    |> put_view(WorldLinkWeb.ErrorJSON)
     |> render(:"401")
+  end
+
+  def call(conn, _) do
+    conn
+    |> put_status(:internal_server)
+    |> put_view(WorldLinkWeb.ErrorJSON)
+    |> render(:"500")
   end
 end

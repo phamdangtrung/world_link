@@ -19,7 +19,10 @@ config :world_link,
 # Configures the endpoint
 config :world_link, WorldLinkWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: WorldLinkWeb.ErrorView, accepts: ~w(html json), layout: false],
+  render_errors: [
+    formats: [html: WorldLinkWeb.ErrorHTML, json: WorldLinkWeb.ErrorJSON],
+    layout: false
+  ],
   pubsub_server: WorldLink.PubSub,
   live_view: [signing_salt: "UdqkcrYi"]
 
@@ -42,12 +45,24 @@ config :swoosh, :api_client, false
 
 # Configure esbuild (the version is required)
 config :esbuild,
-  version: "0.14.29",
+  version: "0.17.11",
   default: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
+
+# Configure tailwind (the version is required)
+config :tailwind,
+  version: "3.2.7",
+  default: [
+    args: ~w(
+      --config=tailwind.config.js
+      --input=css/app.css
+      --output=../priv/static/assets/app.css
+    ),
+    cd: Path.expand("../assets", __DIR__)
   ]
 
 # Configures Elixir's Logger

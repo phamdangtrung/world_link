@@ -3,10 +3,10 @@ defmodule WorldLinkWeb.AuthController do
 
   alias WorldLink.Identity
   alias WorldLinkWeb.Authentication.Guardian
-  plug Ueberauth
-  plug WorldLinkWeb.Authentication.UnauthPipeline when action in [:login]
+  plug(Ueberauth)
+  plug(WorldLinkWeb.Authentication.UnauthPipeline when action in [:login])
 
-  action_fallback WorldLinkWeb.FallbackController
+  action_fallback(WorldLinkWeb.FallbackController)
 
   def login(conn, %{"email_or_username" => email_or_username, "password" => password}) do
     with {:ok, user} <- Identity.get_user_by_email_or_username(email_or_username),
@@ -24,10 +24,13 @@ defmodule WorldLinkWeb.AuthController do
     case Identity.verify_user_existence(user_params) do
       {:ok} ->
         {:ok, user} = Identity.create_oauth_user(user_params)
-        render(conn, "show.json", user: user)
+        render(conn, :user, user: user)
 
-      {:error, :user_already_exists, user} ->
-        render(conn, "show.json", user: user)
+      {:error, :user_already_exists, _user} ->
+        conn
+        |> put_status(:bad_request)
+        |> put_resp_header("location", ~p"/auth/#{assigns.provider}/")
+        |> render("400.json", conn.assigns)
     end
   end
 

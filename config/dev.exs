@@ -33,7 +33,8 @@ config :world_link, WorldLinkWeb.Endpoint,
   secret_key_base: "XWB5pLHJGqxzSBxm+rGIsMzDaFPtjMYyWacLsIFV19yJJ/vAMPEi9TSixAcysqp9",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
 
 # ## SSL Support
@@ -66,10 +67,12 @@ config :world_link, WorldLinkWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/world_link_web/(live|views)/.*(ex)$",
-      ~r"lib/world_link_web/templates/.*(eex)$"
+      ~r"lib/world_link_web/(controllers|live|views)/.*(ex)$"
     ]
   ]
+
+# Enable dev routes for dashboard and mailbox
+config :world_link, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
@@ -80,3 +83,6 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Disable swoosh api client as it is only required for production adapters.
+config :swoosh, :api_client, false

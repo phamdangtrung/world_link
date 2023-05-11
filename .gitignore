@@ -32,3 +32,5 @@ world_link-*.tar
 npm-debug.log
 /assets/node_modules/
 
+/assets/vendor/
+

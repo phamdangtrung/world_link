@@ -15,9 +15,9 @@ defmodule WorldLink.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: WorldLink.PubSub},
       # Start the Endpoint (http/https)
-      WorldLinkWeb.Endpoint
+      WorldLinkWeb.Endpoint,
       # Start a worker by calling: WorldLink.Worker.start_link(arg)
-      # {WorldLink.Worker, arg}
+      {WorldLink.Workers.DatabaseCleanupWorker, %{}}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -76,6 +76,7 @@ defmodule WorldLink.MixProject do
       {:phoenix_swagger, "~> 0.8"},
       {:ex_json_schema, "~> 0.5"},
       {:dialyxir, "~> 1.2", only: [:dev, :test], runtime: false},
+      {:commitlint, "~> 0.1.2"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:faker, "~> 0.17", only: [:dev, :test]},

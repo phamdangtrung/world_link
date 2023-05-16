@@ -1,7 +1,11 @@
 defmodule WorldLink.Worlds.TimelinesCharacterInfo do
+  @moduledoc """
+  TimelinesCharacterInfo schema
+  """
+
   use WorldLink.Schema
   import Ecto.Changeset
-  alias WorldLink.Worlds.{Character, World, Timeline, CharacterInfo}
+  alias WorldLink.Worlds.{Character, CharacterInfo, Timeline, World}
 
   @primary_key false
   @required_fields [:timeline_id, :character_info_id, :character_id, :world_id]

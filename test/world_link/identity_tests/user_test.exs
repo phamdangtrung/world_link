@@ -1,9 +1,7 @@
 defmodule WorldLink.IdentityTests.UserTest do
   use WorldLink.DataCase
-  alias WorldLink.Identity.OauthProfile
   alias Support.Factories.IdentityFactory
-
-  alias WorldLink.Identity.User
+  alias WorldLink.Identity.{OauthProfile, User}
 
   @tag :unit
 

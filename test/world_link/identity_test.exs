@@ -85,7 +85,7 @@ defmodule WorldLink.IdentityTest do
   end
 
   describe "Identity functions for %OauthProfile{}" do
-    alias WorldLink.Identity.{User, OauthProfile}
+    alias WorldLink.Identity.{OauthProfile, User}
 
     test "assign_oauth_profile/2 should return {:ok, %OauthProfile{}} with valid data" do
       valid_user_attrs = %{

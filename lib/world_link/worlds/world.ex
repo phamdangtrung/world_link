@@ -1,4 +1,8 @@
 defmodule WorldLink.Worlds.World do
+  @moduledoc """
+  World schema
+  """
+
   use WorldLink.Schema
   import Ecto
   import Ecto.Changeset

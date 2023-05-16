@@ -1,4 +1,7 @@
 defmodule WorldLink.Worlds.WorldsCharacters do
+  @moduledoc """
+  WorldsCharacters schema
+  """
   use WorldLink.Schema
   import Ecto.Changeset
   alias WorldLink.Worlds.{Character, World}

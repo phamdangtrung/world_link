@@ -1,9 +1,12 @@
 defmodule WorldLink.Worlds.Character do
+  @moduledoc """
+  Character schema
+  """
   use WorldLink.Schema
   import Ecto.Changeset
   import Ecto
-  alias WorldLink.Worlds.{World, CharacterInfo, WorldsCharacters, TimelinesCharacterInfo}
   alias WorldLink.Identity.User
+  alias WorldLink.Worlds.{CharacterInfo, TimelinesCharacterInfo, World, WorldsCharacters}
 
   schema "characters" do
     field(:name, :string)

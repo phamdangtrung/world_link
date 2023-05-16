@@ -1,4 +1,8 @@
 defmodule Support.Factories.WorldsFactory do
+  @moduledoc """
+  Factory for generating Worlds' schemas
+  """
+
   use ExMachina.Ecto, repo: WorldLink.Repo
   alias WorldLink.Worlds.CharacterInfo
 

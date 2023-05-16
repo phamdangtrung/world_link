@@ -1,4 +1,8 @@
 defmodule WorldLink.Worlds.Timeline do
+  @moduledoc """
+  Timeline schema
+  """
+
   use WorldLink.Schema
   import Ecto.Changeset
   import Ecto

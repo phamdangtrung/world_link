@@ -1,6 +1,10 @@
 defmodule Support.Factories.IdentityFactory do
+  @moduledoc """
+  Factory for generating Identity' schemas
+  """
+
   use ExMachina.Ecto, repo: WorldLink.Repo
-  alias WorldLink.Identity.{User, OauthProfile}
+  alias WorldLink.Identity.{OauthProfile, User}
 
   @seconds_per_day 86_400
   @rand_range 0..1_000

@@ -1,4 +1,8 @@
 defmodule WorldLink.Worlds.CharacterInfo do
+  @moduledoc """
+  CharacterInfo schema
+  """
+
   use WorldLink.Schema
   import Ecto.Changeset
   alias WorldLink.Worlds.{Character, Timeline, TimelinesCharacterInfo}

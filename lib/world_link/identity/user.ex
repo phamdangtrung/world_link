@@ -5,8 +5,8 @@ defmodule WorldLink.Identity.User do
   import Ecto.Changeset
   import Ecto
 
-  alias WorldLink.Identity.{User, OauthProfile}
-  alias WorldLink.Worlds.{World, Character}
+  alias WorldLink.Identity.{OauthProfile, User}
+  alias WorldLink.Worlds.{Character, World}
 
   @required_fields [:email, :name, :username, :password]
 

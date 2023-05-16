@@ -1,4 +1,7 @@
 defmodule WorldLink.Workers.DatabaseCleanupWorker do
+  @moduledoc """
+  Worker for cleaning up database every week
+  """
   use GenServer
   import Ecto.Query
   require Logger

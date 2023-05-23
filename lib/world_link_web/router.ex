@@ -2,51 +2,57 @@ defmodule WorldLinkWeb.Router do
   use WorldLinkWeb, :router
 
   pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, {WorldLinkWeb.LayoutView, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
-    # plug :fetch_current_user
-    plug WorldLinkWeb.Locale, "en"
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
+    plug(:put_root_layout, {WorldLinkWeb.Layouts, :root})
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
+    plug(WorldLinkWeb.Locale, "en")
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug(:accepts, ["json"])
   end
 
   pipeline :auth do
-    plug WorldLinkWeb.Authentication.Pipeline
+    plug(WorldLinkWeb.Authentication.Pipeline)
   end
 
   pipeline :un_auth do
-    plug WorldLinkWeb.Authentication.UnauthPipeline
+    plug(WorldLinkWeb.Authentication.UnauthPipeline)
   end
 
   pipeline :admin do
-    plug WorldLinkWeb.Plugs.EnsureRolePlug, [:admin]
+    plug(WorldLinkWeb.Plugs.EnsureRolePlug, [:admin])
   end
 
   scope "/", WorldLinkWeb do
-    pipe_through :browser
+    pipe_through(:browser)
 
-    get "/", PageController, :index
+    get("/", PageController, :home)
   end
 
   scope "/auth", WorldLinkWeb do
-    pipe_through [:api, :un_auth]
+    pipe_through([:api, :un_auth])
 
-    post "/login", AuthController, :login
-    get "/:provider", AuthController, :request
-    get "/:provider/callback", AuthController, :callback
+    post("/login", AuthController, :login)
+    get("/:provider", AuthController, :request)
+    get("/:provider/callback", AuthController, :callback)
   end
 
   # Other scopes may use custom stacks.
   scope "/api", WorldLinkWeb do
-    pipe_through [:api, :auth, :admin]
+    pipe_through(:api)
 
-    get "/users", UserController, :index
+    scope "/users" do
+      pipe_through([:auth, :admin])
+      get("/", UserController, :index)
+    end
+  end
+
+  scope "/api/swagger" do
+    forward("/", PhoenixSwagger.Plug.SwaggerUI, otp_app: :world_link, swagger_file: "swagger.json")
   end
 
   # Enables LiveDashboard only for development
@@ -60,12 +66,13 @@ defmodule WorldLinkWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/" do
-      pipe_through :browser
+      pipe_through(:browser)
 
-      live_dashboard "/dashboard",
+      live_dashboard("/dashboard",
         ecto_repos: [WorldLink.Repo],
         ecto_psql_extras_options: [long_running_queries: [threshold: "200 milliseconds"]],
         metrics: WorldLinkWeb.Telemetry
+      )
     end
   end
 
@@ -75,10 +82,27 @@ defmodule WorldLinkWeb.Router do
   # node running the Phoenix server.
   if Mix.env() == :dev do
     scope "/dev" do
-      pipe_through :browser
+      pipe_through(:browser)
 
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+      forward("/mailbox", Plug.Swoosh.MailboxPreview)
     end
+  end
+
+  def swagger_info do
+    %{
+      info: %{
+        version: "1.0",
+        title: "World Link API",
+        basePath: "/api"
+      },
+      securityDefinitions: %{
+        Bearer: %{
+          type: "apiKey",
+          name: "Authorization",
+          in: "header"
+        }
+      }
+    }
   end
 
   ## Authentication routes

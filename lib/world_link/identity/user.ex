@@ -3,28 +3,37 @@ defmodule WorldLink.Identity.User do
 
   use WorldLink.Schema
   import Ecto.Changeset
+  import Ecto
 
-  alias WorldLink.Identity.{User, OauthProfile}
+  alias WorldLink.Identity.{OauthProfile, User}
+  alias WorldLink.Worlds.{Character, World}
+
+  @required_fields [:email, :name, :username, :password]
 
   schema "users" do
-    field :activated, :boolean, default: false
-    field :activated_at, :utc_datetime
-    field :email, :string
-    field :normalized_email, :string
-    field :name, :string
-    field :username, :string
-    field :normalized_username, :string
-    field :password, :string, virtual: true, redact: true
-    field :hashed_password, :string, redact: true
-    field :role_name, Ecto.Enum, values: [:user, :admin]
+    field(:activated, :boolean, default: false)
+    field(:activated_at, :utc_datetime)
+    field(:email, :string)
+    field(:normalized_email, :string)
+    field(:name, :string)
+    field(:username, :string)
+    field(:normalized_username, :string)
+    field(:password, :string, virtual: true, redact: true)
+    field(:hashed_password, :string, redact: true)
+    field(:role_name, Ecto.Enum, values: [:user, :admin])
+    field(:settings, :map, default: %{})
+    field(:deleted, :boolean, default: false)
+    field(:deleted_at, :utc_datetime)
 
-    has_many :oauth_profiles, OauthProfile
+    has_many(:oauth_profiles, OauthProfile, where: [deleted: false])
+    has_many(:worlds, World, where: [deleted: false])
+    has_many(:characters, Character, where: [deleted: false])
     timestamps()
   end
 
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:username, :name, :email, :password])
+    |> cast(attrs, @required_fields)
     |> validate_name()
     |> validate_username()
     |> validate_email()
@@ -122,5 +131,17 @@ defmodule WorldLink.Identity.User do
       |> DateTime.truncate(:second)
 
     change(user, activated_at: now, activated: true)
+  end
+
+  def changeset_create_a_world(user, world_attrs) do
+    user
+    |> build_assoc(:worlds)
+    |> World.world_changeset(world_attrs)
+  end
+
+  def changeset_create_a_character(user, character_attrs) do
+    user
+    |> build_assoc(:characters)
+    |> Character.character_changeset(character_attrs)
   end
 end

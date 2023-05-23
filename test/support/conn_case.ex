@@ -28,6 +28,7 @@ defmodule WorldLinkWeb.ConnCase do
 
       # The default endpoint for testing
       @endpoint WorldLinkWeb.Endpoint
+      use WorldLinkWeb, :verified_routes
     end
   end
 

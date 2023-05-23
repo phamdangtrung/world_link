@@ -19,7 +19,10 @@ config :world_link,
 # Configures the endpoint
 config :world_link, WorldLinkWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: WorldLinkWeb.ErrorView, accepts: ~w(html json), layout: false],
+  render_errors: [
+    formats: [html: WorldLinkWeb.ErrorHTML, json: WorldLinkWeb.ErrorJSON],
+    layout: false
+  ],
   pubsub_server: WorldLink.PubSub,
   live_view: [signing_salt: "UdqkcrYi"]
 
@@ -42,12 +45,24 @@ config :swoosh, :api_client, false
 
 # Configure esbuild (the version is required)
 config :esbuild,
-  version: "0.14.29",
+  version: "0.17.11",
   default: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
+
+# Configure tailwind (the version is required)
+config :tailwind,
+  version: "3.2.7",
+  default: [
+    args: ~w(
+      --config=tailwind.config.js
+      --input=css/app.css
+      --output=../priv/static/assets/app.css
+    ),
+    cd: Path.expand("../assets", __DIR__)
   ]
 
 # Configures Elixir's Logger
@@ -75,6 +90,20 @@ config :ueberauth, Ueberauth,
        ]}
   ]
 
+# PhoenixSwagger configuration
+
+config :world_link, :phoenix_swagger,
+  swagger_files: %{
+    "priv/static/swagger.json" => [
+      # phoenix routes will be converted to swagger paths
+      router: WorldLinkWeb.Router,
+      # (optional) endpoint config used to set host, port and https schemes.
+      endpoint: WorldLinkWeb.Endpoint
+    ]
+  }
+
+config :phoenix_swagger, json_library: Jason
+
 # Strategy provider configuration
 # config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
 #   client_id: System.get_env("DISCORD_CLIENT_ID"),
@@ -95,6 +124,22 @@ config :stripity_stripe,
     "sk_test_51MmSWJAgrTXGiFxd0xUx3lBd2CiPfPBpvHtGXeBb4nrGE89V5cVs5tg9PjBa011URub7sNvvhGvsbm3X9gz4eWZy00bXdxQ9Eg",
   hackney_opts: [{:connect_timeout, 1000}, {:recv_timeout, 5000}],
   retries: [max_attempts: 2, base_backoff: 500, max_backoff: 2_000]
+
+# Configuration for commit_lint
+config :commitlint,
+  allowed_types: [
+    "feat",
+    "fix",
+    "docs",
+    "style",
+    "refactor",
+    "perf",
+    "test",
+    "build",
+    "ci",
+    "chore",
+    "revert"
+  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

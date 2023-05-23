@@ -21,6 +21,7 @@ defmodule WorldLink.Identity.User do
     field(:password, :string, virtual: true, redact: true)
     field(:hashed_password, :string, redact: true)
     field(:role_name, Ecto.Enum, values: [:user, :admin])
+    field(:settings, :map, default: %{})
     field(:deleted, :boolean, default: false)
     field(:deleted_at, :utc_datetime)
 

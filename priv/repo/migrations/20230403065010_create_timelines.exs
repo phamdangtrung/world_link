@@ -3,8 +3,8 @@ defmodule WorldLink.Repo.Migrations.CreateTimelines do
 
   def change do
     create table(:timelines) do
-      add :name, :string, size: 255, null: false
-      add :world_id, references(:worlds)
+      add(:name, :string, size: 255, null: false)
+      add(:world_id, references(:worlds))
 
       timestamps()
     end

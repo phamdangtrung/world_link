@@ -13,11 +13,13 @@ defmodule WorldLink.Repo.Migrations.AddTableTimelinesCharacterInfo do
       add(:world_id, references(:worlds, on_delete: :delete_all))
     end
 
-    create index(:timelines_character_info, [:timeline_id])
-    create index(:timelines_character_info, [:character_info_id])
+    create(index(:timelines_character_info, [:timeline_id]))
+    create(index(:timelines_character_info, [:character_info_id]))
 
-    create unique_index(:timelines_character_info, [:timeline_id, :character_info_id],
-             name: :timeline_id_character_info_id_unique_index
-           )
+    create(
+      unique_index(:timelines_character_info, [:timeline_id, :character_info_id],
+        name: :timeline_id_character_info_id_unique_index
+      )
+    )
   end
 end

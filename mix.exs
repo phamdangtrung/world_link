@@ -5,7 +5,7 @@ defmodule WorldLink.MixProject do
     [
       app: :world_link,
       version: "0.1.0",
-      elixir: "~> 1.12",
+      elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [] ++ Mix.compilers() ++ [:phoenix_swagger],
       start_permanent: Mix.env() == :prod,
@@ -81,7 +81,8 @@ defmodule WorldLink.MixProject do
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:faker, "~> 0.17", only: [:dev, :test]},
       {:ex_machina, "~> 2.7.0", only: :test},
-      {:finch, "~> 0.13"}
+      {:finch, "~> 0.13"},
+      {:httpoison, "~> 2.1"}
     ]
   end
 
@@ -100,7 +101,7 @@ defmodule WorldLink.MixProject do
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
-      ensure_consistency: ["test", "dialyzer", "credo --strict", "coveralls"]
+      ensure_consistency: ["test --cover", "dialyzer", "credo --strict"]
     ]
   end
 end

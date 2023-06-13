@@ -3,8 +3,8 @@ defmodule WorldLink.Repo.Migrations.CreateCharacters do
 
   def change do
     create table(:characters) do
-      add :name, :string, size: 255, null: false
-      add :user_id, references(:users)
+      add(:name, :string, size: 255, null: false)
+      add(:user_id, references(:users))
 
       timestamps()
     end

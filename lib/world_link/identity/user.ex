@@ -6,6 +6,7 @@ defmodule WorldLink.Identity.User do
   import Ecto
 
   alias WorldLink.Identity.{OauthProfile, User}
+  alias WorldLink.Images.Image
   alias WorldLink.Worlds.{Character, World}
 
   @required_fields [:email, :name, :username, :password]
@@ -27,6 +28,7 @@ defmodule WorldLink.Identity.User do
     has_many(:oauth_profiles, OauthProfile, where: [deleted: false])
     has_many(:worlds, World, where: [deleted: false])
     has_many(:characters, Character, where: [deleted: false])
+    has_many(:images, Image)
     timestamps()
   end
 
@@ -142,5 +144,11 @@ defmodule WorldLink.Identity.User do
     user
     |> build_assoc(:characters)
     |> Character.character_changeset(character_attrs)
+  end
+
+  def changeset_upload_image(user, image) when not is_list(image) do
+    user
+    |> build_assoc(:images)
+    |> Image.changeset(image)
   end
 end

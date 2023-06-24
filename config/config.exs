@@ -29,7 +29,7 @@ config :world_link, WorldLinkWeb.Endpoint,
 # Configures Guardian
 config :world_link, WorldLinkWeb.Authentication.Guardian,
   issuer: "world_link",
-  secret_key: "RtII21elWJmCKDCIHO4os3x2Mc4mDJGqnwIbsc/EQvmpWPOYcDL6DL06U6NLsvR4"
+  secret_key: System.get_env("DEV_GUARDIAN_SECRET")
 
 # Configures the mailer
 #
@@ -110,18 +110,17 @@ config :phoenix_swagger, json_library: Jason
 #   client_secret: System.get_env("DISCORD_CLIENT_SECRET")
 
 config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
-  client_id: "1080413348081958922",
-  client_secret: "384DtQlPrie0fjvLy6jpk73Opm34bHI3"
+  client_id: System.get_env("DEV_UEBERAUTH_DISCORD_CLIENT_ID"),
+  client_secret: System.get_env("DEV_UEBERAUTH_DISCORD_CLIENT_SECRET")
 
 config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
-  client_id: "943252580360716",
-  client_secret: "2b570e7a587af6069b1bce4dbeb5a411"
+  client_id: System.get_env("DEV_UEBERAUTH_FACEBOOK_CLIENT_ID"),
+  client_secret: System.get_env("DEV_UEBERAUTH_FACEBOOK_CLIENT_SECRET")
 
 # Configuration for Stripe
 
 config :stripity_stripe,
-  api_key:
-    "sk_test_51MmSWJAgrTXGiFxd0xUx3lBd2CiPfPBpvHtGXeBb4nrGE89V5cVs5tg9PjBa011URub7sNvvhGvsbm3X9gz4eWZy00bXdxQ9Eg",
+  api_key: System.get_env("DEV_STRIPE_KEY"),
   hackney_opts: [{:connect_timeout, 1000}, {:recv_timeout, 5000}],
   retries: [max_attempts: 2, base_backoff: 500, max_backoff: 2_000]
 

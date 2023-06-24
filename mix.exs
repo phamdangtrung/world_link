@@ -82,7 +82,8 @@ defmodule WorldLink.MixProject do
       {:faker, "~> 0.17", only: [:dev, :test]},
       {:ex_machina, "~> 2.7.0", only: :test},
       {:finch, "~> 0.13"},
-      {:httpoison, "~> 2.1"}
+      {:httpoison, "~> 2.1"},
+      {:sobelow, "~> 0.12", only: [:dev, :test], runtime: false}
     ]
   end
 

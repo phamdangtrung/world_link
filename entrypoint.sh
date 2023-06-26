@@ -17,6 +17,11 @@ then
   mix ecto.migrate
   mix run priv/repo/seeds.exs
   echo "Database $PGDATABASE created."
+  echo "Setting up npm"
+  mix assets.setup
+  mix assets.build
+  mix assets.deploy
+  echo "Finish setting up npm"
 fi
 
-exec mix phx.server
+exec iex -S mix phx.server

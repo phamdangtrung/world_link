@@ -14,9 +14,10 @@ services:
       PGPASSWORD: postgres
       PGDATABASE: wl_development
       PGPORT: 5432
+      PGHOST: db
       MIX_ENV: dev
-      DISCORD_CLIENT_ID: 1080413348081958922
-      DISCORD_CLIENT_SECRET: 384DtQlPrie0fjvLy6jpk73Opm34bHI3
+
+
       # Hostname of our Postgres container.
       PGHOST: db
       # DATABASE_URL: "postgresql://postgres:postgres@db/wl_development"

@@ -1,7 +1,8 @@
-FROM elixir:1.14.3-alpine
+FROM elixir:1.15.0-alpine
 
 RUN apk update && \
-  apk add postgresql-client inotify-tools
+  apk add postgresql-client inotify-tools && \
+  apk add --update nodejs npm
 # Create app directory and copy the Elixir projects into it.
 RUN mkdir /app
 COPY . /app

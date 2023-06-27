@@ -24,4 +24,4 @@ then
   echo "Finish setting up npm"
 fi
 
-exec iex -S mix phx.server
+exec mix phx.server

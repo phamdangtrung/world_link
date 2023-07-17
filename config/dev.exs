@@ -1,15 +1,15 @@
 import Config
 
-env = Mix.env() |> to_string() |> String.upcase()
 # Configure your database
-# config :world_link, WorldLink.Repo,
-  # username: "postgres",
-  # password: "123",
-  # hostname: "localhost",
-  # database: "wl_development",
-  # stacktrace: true,
-  # show_sensitive_data_on_connection_error: true,
-  # pool_size: 10
+config :world_link, WorldLink.Repo,
+  username: System.get_env("DB_USERNAME"),
+  password: System.get_env("DB_PASSWORD"),
+  hostname: System.get_env("DB_HOSTNAME"),
+  port: System.get_env("DB_PORT"),
+  database: System.get_env("DB_DATABASE"),
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
 
 # For development, we disable any cache and enable
 # debugging and code reloading.
@@ -31,7 +31,7 @@ config :world_link, WorldLinkWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: System.get_env("#{env}_APP_SECRET"),
+  secret_key_base: "XWB5pLHJGqxzSBxm+rGIsMzDaFPtjMYyWacLsIFV19yJJ/vAMPEi9TSixAcysqp9",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},

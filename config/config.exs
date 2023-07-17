@@ -29,7 +29,7 @@ config :world_link, WorldLinkWeb.Endpoint,
 # Configures Guardian
 config :world_link, WorldLinkWeb.Authentication.Guardian,
   issuer: "world_link",
-  secret_key: System.get_env("DEV_GUARDIAN_SECRET")
+  secret_key: System.get_env("GUARDIAN_SECRET")
 
 # Configures the mailer
 #

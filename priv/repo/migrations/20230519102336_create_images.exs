@@ -18,7 +18,8 @@ defmodule WorldLink.Repo.Migrations.CreateImages do
       add(:key, :string, size: 40)
       add(:nsfw, :boolean, default: false, null: false)
       add(:sensitive, :boolean, default: false, null: false)
-      add(:title, :string)
+      add(:shared, :boolean, default: false, null: false)
+      add(:title, :string, size: 255)
       add(:url, :string)
 
       add(:user_id, references(:users))

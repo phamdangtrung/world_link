@@ -110,17 +110,17 @@ config :phoenix_swagger, json_library: Jason
 #   client_secret: System.get_env("DISCORD_CLIENT_SECRET")
 
 config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
-  client_id: System.get_env("DEV_UEBERAUTH_DISCORD_CLIENT_ID"),
-  client_secret: System.get_env("DEV_UEBERAUTH_DISCORD_CLIENT_SECRET")
+  client_id: System.get_env("UEBERAUTH_DISCORD_CLIENT_ID"),
+  client_secret: System.get_env("UEBERAUTH_DISCORD_CLIENT_SECRET")
 
 config :ueberauth, Ueberauth.Strategy.Facebook.OAuth,
-  client_id: System.get_env("DEV_UEBERAUTH_FACEBOOK_CLIENT_ID"),
-  client_secret: System.get_env("DEV_UEBERAUTH_FACEBOOK_CLIENT_SECRET")
+  client_id: System.get_env("UEBERAUTH_FACEBOOK_CLIENT_ID"),
+  client_secret: System.get_env("UEBERAUTH_FACEBOOK_CLIENT_SECRET")
 
 # Configuration for Stripe
 
 config :stripity_stripe,
-  api_key: System.get_env("DEV_STRIPE_KEY"),
+  api_key: System.get_env("STRIPE_KEY"),
   hackney_opts: [{:connect_timeout, 1000}, {:recv_timeout, 5000}],
   retries: [max_attempts: 2, base_backoff: 500, max_backoff: 2_000]
 

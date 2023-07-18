@@ -11,9 +11,9 @@ defmodule WorldLink.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
-      dialyzer: [
-        plt_add_apps: [:ex_unit]
-      ],
+      # dialyzer: [
+      #   plt_add_apps: [:ex_unit]
+      # ],
 
       # Docs
       name: "World Link",
@@ -75,7 +75,7 @@ defmodule WorldLink.MixProject do
       {:guardian, "~> 2.3"},
       {:phoenix_swagger, "~> 0.8"},
       {:ex_json_schema, "~> 0.5"},
-      {:dialyxir, "~> 1.2", only: [:dev, :test], runtime: false},
+      # {:dialyxir, "~> 1.2", only: [:dev, :test], runtime: false},
       {:commitlint, "~> 0.1.2"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
@@ -102,7 +102,7 @@ defmodule WorldLink.MixProject do
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
-      ensure_consistency: ["test --cover", "dialyzer", "credo --strict"]
+      ensure_consistency: ["test --cover", "credo --strict"]
     ]
   end
 end

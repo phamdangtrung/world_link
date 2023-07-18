@@ -3,8 +3,9 @@ defmodule WorldLink.Images.Image do
   Image schema
   """
   alias WorldLink.Identity.User
-  use WorldLink.Schema
+  alias WorldLink.Images.{Album, AlbumsImages}
   import Ecto.Changeset
+  use WorldLink.Schema
 
   schema "images" do
     field(:artist, :string)
@@ -22,7 +23,17 @@ defmodule WorldLink.Images.Image do
     field(:key, :string)
     field(:nsfw, :boolean, default: false)
     field(:sensitive, :boolean, default: false)
+    field(:shared, :boolean, default: false)
     field(:title, :string)
+
+    has_many(:albums_images, AlbumsImages)
+
+    many_to_many(
+      :albums,
+      Album,
+      join_through: "albums_images",
+      on_replace: :delete
+    )
 
     belongs_to(:user, User)
     timestamps()

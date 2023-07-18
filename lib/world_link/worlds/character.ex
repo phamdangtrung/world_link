@@ -2,11 +2,12 @@ defmodule WorldLink.Worlds.Character do
   @moduledoc """
   Character schema
   """
-  use WorldLink.Schema
+  alias WorldLink.Identity.User
+  alias WorldLink.Images.{Album, AlbumsCharacters}
+  alias WorldLink.Worlds.{CharacterInfo, TimelinesCharacterInfo, World, WorldsCharacters}
   import Ecto.Changeset
   import Ecto
-  alias WorldLink.Identity.User
-  alias WorldLink.Worlds.{CharacterInfo, TimelinesCharacterInfo, World, WorldsCharacters}
+  use WorldLink.Schema
 
   schema "characters" do
     field(:name, :string)
@@ -22,6 +23,15 @@ defmodule WorldLink.Worlds.Character do
       :worlds,
       World,
       join_through: "worlds_characters",
+      on_replace: :delete
+    )
+
+    has_many(:albums_characters, AlbumsCharacters)
+
+    many_to_many(
+      :albums,
+      Album,
+      join_through: "albums_characters",
       on_replace: :delete
     )
 

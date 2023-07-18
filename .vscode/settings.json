@@ -2,6 +2,7 @@
     "conventionalCommits.scopes": [
       "user",
       "config",
-      "database"
+      "database",
+      "feature"
     ]
 }

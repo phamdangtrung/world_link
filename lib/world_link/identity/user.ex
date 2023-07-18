@@ -6,7 +6,7 @@ defmodule WorldLink.Identity.User do
   import Ecto
 
   alias WorldLink.Identity.{OauthProfile, User}
-  alias WorldLink.Images.Image
+  alias WorldLink.Images.{Album, Image}
   alias WorldLink.Worlds.{Character, World}
 
   @required_fields [:email, :name, :username, :password]
@@ -30,6 +30,7 @@ defmodule WorldLink.Identity.User do
     has_many(:worlds, World, where: [deleted: false])
     has_many(:characters, Character, where: [deleted: false])
     has_many(:images, Image)
+    has_many(:albums, Album)
     timestamps()
   end
 

@@ -12,7 +12,7 @@ defmodule Support.Factories.IdentityFactory do
 
   def user_factory(attrs) do
     email = sequence(:email, &"email-#{&1}@email.com")
-    username = sequence("username")
+    username = sequence(:username, &"username#{&1}")
 
     %User{
       name: Faker.Person.name(),

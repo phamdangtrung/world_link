@@ -18,7 +18,7 @@ config :world_link, WorldLink.Repo,
 # you can enable the server option below.
 config :world_link, WorldLinkWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "",
+  secret_key_base: System.get_env("APP_SECRET"),
   server: false
 
 # In test we don't send emails.

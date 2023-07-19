@@ -17,6 +17,10 @@ defmodule WorldLink.Worlds do
     WorldsCharacters
   }
 
+  @spec create_a_world(User.t() | any(), %{} | map() | any()) ::
+          {:ok, World.t()}
+          | {:error, :create_a_world, Ecto.Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
   Creates a new world for a given user.
 
@@ -76,6 +80,8 @@ defmodule WorldLink.Worlds do
 
   def create_a_world(_, _), do: {:error, :invalid_params}
 
+  @spec create_a_timeline(World.t() | any(), %{} | map() | any()) ::
+          {atom(), Timeline.t() | Ecto.Changeset.t() | :invalid_params}
   @doc """
   Creates a new timeline for a world.
 
@@ -103,6 +109,10 @@ defmodule WorldLink.Worlds do
 
   def create_a_timeline(_, _), do: {:error, :invalid_params}
 
+  @spec create_a_character(User.t() | any(), %{} | map() | any()) ::
+          {:ok, %{bio: CharacterInfo.t(), character: Character.t()}}
+          | {:error, :character, String.t()}
+          | {:error, :invalid_params}
   @doc """
   Creates a new character for a user.
 
@@ -133,6 +143,10 @@ defmodule WorldLink.Worlds do
 
   def create_a_character(_, _), do: {:error, :invalid_params}
 
+  @spec create_a_character_bio(Character.t() | any(), %{} | map() | any()) ::
+          {:ok, CharacterInfo.t()}
+          | {:error, Ecto.Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
   Creates a new bio for a character.
 
@@ -160,6 +174,10 @@ defmodule WorldLink.Worlds do
 
   def create_a_character_bio(_, _), do: {:error, :invalid_params}
 
+  @spec assign_characters_to_a_world(World.t() | any(), [] | list(Character.t()) | any()) ::
+          list(any)
+          | {:error, :empty_list}
+          | {:error, :invalid_params}
   @doc """
   Assigns a list of characters to a world.
 
@@ -183,6 +201,10 @@ defmodule WorldLink.Worlds do
 
   def assign_characters_to_a_world(_, _), do: {:error, :invalid_params}
 
+  @spec assign_a_character_to_a_world(World.t() | any(), Character.t() | any()) ::
+          {:ok, CharacterInfo.t()}
+          | {:error, Ecto.Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
   Assigns a character to a world.
 
@@ -212,6 +234,10 @@ defmodule WorldLink.Worlds do
 
   def assign_a_character_to_a_world(_, _), do: {:error, :invalid_params}
 
+  @spec assign_a_character_info_to_a_timeline(Timeline.t() | any(), CharacterInfo.t() | any()) ::
+          {:ok, TimelinesCharacterInfo.t()}
+          | {:error, Ecto.Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
   Assigns a character info to a timeline.
 
@@ -252,6 +278,10 @@ defmodule WorldLink.Worlds do
 
   def assign_a_character_info_to_a_timeline(_, _), do: {:error, :invalid_params}
 
+  @spec update_main_timeline(World.t() | any(), Timeline.t() | any()) ::
+          {:ok, World.t()}
+          | {:error, :remove_current_main_timeline | :update_main_timeline, Ecto.Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
   Updates the main timeline of a world.
 
@@ -295,6 +325,10 @@ defmodule WorldLink.Worlds do
 
   def update_main_timeline(_, _), do: {:error, :invalid_params}
 
+  @spec update_a_world(World.t() | any(), %{} | map() | any()) ::
+          {:ok, World.t()}
+          | {:error, Ecto.Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
   Updates attributes of a world.
 
@@ -323,6 +357,10 @@ defmodule WorldLink.Worlds do
 
   def update_a_world(_, _), do: {:error, :invalid_params}
 
+  @spec update_a_character(Character.t() | any(), %{} | map() | any()) ::
+          {:ok, Character.t()}
+          | {:error, Ecto.Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
   Updates attributes of a character.
 
@@ -351,6 +389,10 @@ defmodule WorldLink.Worlds do
 
   def update_a_character(_, _), do: {:error, :invalid_params}
 
+  @spec update_a_character_info(CharacterInfo.t() | any(), %{} | map() | any()) ::
+          {:ok, CharacterInfo.t()}
+          | {:error, Ecto.Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
   Updates attributes of a character info.
 
@@ -379,6 +421,10 @@ defmodule WorldLink.Worlds do
 
   def update_a_character_info(_, _), do: {:error, :invalid_params}
 
+  @spec update_a_timeline(Timeline.t() | any(), %{} | map() | any()) ::
+          {:ok, Timeline.t()}
+          | {:error, Ecto.Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
   Updates attributes of a timeline.
 
@@ -407,6 +453,14 @@ defmodule WorldLink.Worlds do
 
   def update_a_timeline(_, _), do: {:error, :invalid_params}
 
+  @spec delete_a_world(World.t() | any()) ::
+          :ok
+          | {:error, :invalid_params}
+          | {:error,
+             :delete_associated_timelines
+             | :delete_associated_timelines_character_info
+             | :delete_associated_worlds_characters
+             | :delete_world, Ecto.Changeset.t() | any()}
   @doc """
   Marks a world and its associated timelines as deleted and updates [:deleted_at, :updated_at].
 
@@ -483,6 +537,11 @@ defmodule WorldLink.Worlds do
 
   def delete_a_world(_), do: {:error, :invalid_params}
 
+  @spec delete_a_timeline(Timeline.t() | any()) ::
+          :ok
+          | {:error, :invalid_params}
+          | {:error, :delete_associated_timelines_character_info | :delete_timeline,
+             Ecto.Changeset.t() | any()}
   @doc """
   Marks a timeline and its associated character info as deleted and updates [:deleted_at, :updated_at].
 
@@ -535,6 +594,14 @@ defmodule WorldLink.Worlds do
 
   def delete_a_timeline(_), do: {:error, :invalid_params}
 
+  @spec delete_a_character(Character.t() | any()) ::
+          :ok
+          | {:error, :invalid_params}
+          | {:error,
+             :delete_associated_character_info
+             | :delete_associated_timelines_character_info
+             | :delete_associated_worlds_characters
+             | :delete_timeline, Ecto.Changeset.t() | any()}
   @doc """
   Marks a character and its character info as deleted and updates [:deleted_at, :updated_at].
 
@@ -611,6 +678,12 @@ defmodule WorldLink.Worlds do
 
   def delete_a_character(_), do: {:error, :invalid_params}
 
+  @spec unassign_a_character_from_a_world(World.t() | any(), Character.t() | any()) ::
+          {:error, :invalid_params}
+          | {:ok, map()}
+          | {:error,
+             :delete_associated_timelines_character_info | :delete_associated_worlds_characters,
+             Ecto.Changeset.t() | any()}
   @doc """
   Unassigns a character from a world and marks its associations as deleted and updates [:deleted_at, :updated_at].
 
@@ -667,6 +740,8 @@ defmodule WorldLink.Worlds do
 
   def unassign_a_character_from_a_world(_, _), do: {:error, :invalid_params}
 
+  @spec unassign_a_character_from_a_timeline(Timeline.t() | any(), CharacterInfo.t() | any()) ::
+          {atom(), any()}
   @doc """
   Unassigns a character from a timeline and marks its associations as deleted and updates [:deleted_at, :updated_at].
 
@@ -701,6 +776,13 @@ defmodule WorldLink.Worlds do
 
   def unassign_a_character_from_a_timeline(_, _), do: {:error, :invalid_params}
 
+  @spec transfer_character(Character.t() | any(), User.t() | any()) ::
+          :ok
+          | {:error, :invalid_params}
+          | {:error,
+             :transfer_character
+             | :unassign_character_from_all_timelines
+             | :unassign_character_from_all_worlds, Ecto.Changeset.t() | any()}
   @doc """
   Transfers a character to another user.
 
@@ -763,6 +845,13 @@ defmodule WorldLink.Worlds do
 
   def transfer_character(_, _), do: {:error, :invalid_params}
 
+  @spec delete_character(Character.t() | any()) ::
+          :ok
+          | {:error, :invalid_params}
+          | {:error,
+             :delete_character
+             | :unassign_character_from_all_timelines
+             | :unassign_character_from_all_worlds, Ecto.Changeset.t() | any()}
   @doc """
   Marks a character and its associations as deleted and updates [:deleted_at, :updated_at].
 

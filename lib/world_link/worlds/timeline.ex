@@ -27,6 +27,17 @@ defmodule WorldLink.Worlds.Timeline do
     timestamps()
   end
 
+  @type t() :: %__MODULE__{
+          __meta__: Ecto.Schema.Metadata.t(),
+          id: Ecto.ULID.t(),
+          name: String.t(),
+          deleted: boolean(),
+          deleted_at: DateTime.t() | nil,
+          world_id: Ecto.ULID.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
   @doc false
   def timeline_changeset(timeline, attrs) do
     timeline

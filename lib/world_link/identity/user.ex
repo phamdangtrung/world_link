@@ -34,6 +34,26 @@ defmodule WorldLink.Identity.User do
     timestamps()
   end
 
+  @type t() :: %__MODULE__{
+          __meta__: Ecto.Schema.Metadata.t(),
+          id: Ecto.ULID.t(),
+          activated: boolean(),
+          activated_at: DateTime.t() | nil,
+          email: String.t(),
+          normalized_email: String.t(),
+          name: String.t(),
+          username: String.t(),
+          normalized_username: String.t(),
+          password: String.t(),
+          hashed_password: String.t(),
+          role_name: atom(),
+          settings: map(),
+          deleted: boolean(),
+          deleted_at: DateTime.t() | nil,
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
   def registration_changeset(user, attrs) do
     user
     |> cast(attrs, @required_fields)

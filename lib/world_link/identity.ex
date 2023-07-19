@@ -10,6 +10,7 @@ defmodule WorldLink.Identity do
   alias WorldLink.Identity.User
   alias WorldLink.Repo
 
+  @spec list_users(map()) :: [User.t(), ...] | []
   @doc """
   Returns the list of users with pagination.
 
@@ -19,23 +20,35 @@ defmodule WorldLink.Identity do
       [%User{}, ...]
 
   """
-  def list_users(opts \\ []) do
+  def list_users(opts \\ %{}) do
     defaults = %{
-      page: 1,
-      page_size: 10
+      page_size: 20,
+      last_user_id: nil
     }
 
-    %{page: page, page_size: page_size} = Enum.into(opts, defaults)
+    %{page_size: page_size, last_user_id: last_user_id} = Enum.into(opts, defaults)
 
-    Repo.all(
-      from(users in User,
-        select: [:id, :name, :activated, :username, :email],
-        limit: ^page_size,
-        offset: ^((page - 1) * page_size)
-      )
-    )
+    list_users(page_size, last_user_id)
   end
 
+  defp list_users(page_size, last_user_id) when not is_nil(last_user_id) do
+    from(users in User,
+      select: [:id, :name, :activated, :normalized_email, :normalized_username, :role_name],
+      limit: ^page_size,
+      where: users.id > ^last_user_id
+    )
+    |> Repo.all()
+  end
+
+  defp list_users(page_size, _) do
+    from(users in User,
+      select: [:id, :name, :activated, :normalized_email, :normalized_username, :role_name],
+      limit: ^page_size
+    )
+    |> Repo.all()
+  end
+
+  @spec get_user!(String.t()) :: User.t() | %Ecto.NoResultsError{}
   @doc """
   Gets a single user using id.
 
@@ -52,6 +65,7 @@ defmodule WorldLink.Identity do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  @spec create_user(%{} | map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
   @doc """
   Creates a user.
 
@@ -70,25 +84,26 @@ defmodule WorldLink.Identity do
     |> Repo.insert()
   end
 
+  @spec create_oauth_user(%{} | map()) ::
+          {:ok, User.t()} | {:error, atom(), Ecto.Changeset.t()} | {:error, String.t()}
   @doc """
   Creates a user using OAuth2.
 
   ## Examples
 
       iex> create_oauth_user(%{field: value})
-      {:ok, %{user: %User{}, oauth_profile: _}}
+      {:ok, %User{}}
 
       iex> create_oauth_user(%{field: bad_value})
-      {:error, "An error occurred when trying to register this user."}
+      {:error, :user, %Ecto.Changeset{}}
 
       iex> create_oauth_user(%{field: bad_value})
-      {:error, "An error occurred when trying to register an oauth profile for this user."}
+      {:error, :oauth_profile, %Ecto.Changeset{]}}
 
       iex> create_oauth_user(%{field: bad_value})
       {:error, "An unknown error."}
 
   """
-
   def create_oauth_user(attrs \\ %{}) do
     Multi.new()
     |> Multi.insert(:user, User.oauth_registration_changeset(%User{}, attrs))
@@ -112,6 +127,8 @@ defmodule WorldLink.Identity do
     end
   end
 
+  @spec assign_oauth_profile(User.t(), %{} | map()) ::
+          {:ok, OauthProfile.t()} | {:error, %Ecto.Changeset{}} | {:error, :invalid_params}
   @doc """
   Assigns an %OauthProfile{} to an existing %User{}.
 
@@ -121,15 +138,16 @@ defmodule WorldLink.Identity do
       {:ok, %OauthProfile{}}
 
       iex> assign_oauth_profile(%User{}, attrs)
-      {:error, changeset
+      {:error, %Ecto.Changeset{}}
 
   """
-
-  def assign_oauth_profile(%User{} = user, attrs \\ %{}) do
+  def assign_oauth_profile(%User{} = user, attrs) when is_map(attrs) do
     OauthProfile.registration_changeset(user, attrs)
     |> Repo.insert()
   end
 
+  def assign_oauth_profile(_, _), do: {:error, :invalid_params}
+  @spec verify_user_existence(%{} | map()) :: {:ok} | {:error, :user_already_exists, User.t()}
   @doc """
   Verifies whether user with the provided email or a combination of provider_uid and oauth_provider exist in the database
 
@@ -139,11 +157,10 @@ defmodule WorldLink.Identity do
       {:ok}
 
       iex> verify_user_existence(attrs)
-      {:error, :user_already_exists}
+      {:error, :user_already_exists, %User{}}
 
   """
-
-  def verify_user_existence(attrs \\ []) do
+  def verify_user_existence(attrs \\ %{}) do
     defaults = %{
       provider_uid: nil,
       oauth_provider: nil
@@ -152,7 +169,7 @@ defmodule WorldLink.Identity do
     %{email: email, provider_uid: provider_uid, oauth_provider: oauth_provider} =
       Enum.into(attrs, defaults)
 
-    with nil <- get_oauth_user(email),
+    with nil <- get_user_by_email(email),
          nil <- get_oauth_user(provider_uid, oauth_provider) do
       {:ok}
     else
@@ -160,6 +177,10 @@ defmodule WorldLink.Identity do
     end
   end
 
+  @spec get_user_by_email_or_username(String.t()) ::
+          {:ok, User.t()}
+          | {:error, :not_found}
+          | {:error, :invalid_params}
   @doc """
   Gets a user by email or username.
 
@@ -176,22 +197,28 @@ defmodule WorldLink.Identity do
 
       iex> get_user_by_email("foo")
       {:error, :not_found}
+    
+      iex> get_user_by_email(123)
+      {:error, :invalid_params}
+
 
   """
   def get_user_by_email_or_username(email_or_username) when is_binary(email_or_username) do
-    get_user_by_email(email_or_username)
-    |> get_user_by_username()
-    |> case do
+    with nil <- get_user_by_email(email_or_username),
+         nil <- get_user_by_username(email_or_username) do
+      {:error, :not_found}
+    else
       %User{} = user -> {:ok, user}
-      nil -> {:error, :not_found}
     end
   end
+
+  def get_user_by_email_or_username(_), do: {:error, :invalid_params}
 
   defp get_user_by_email(email) when is_binary(email) do
     Repo.get_by(User, normalized_email: email |> String.downcase())
     |> case do
       %User{} = user -> user
-      nil -> email
+      nil -> nil
     end
   end
 
@@ -203,8 +230,8 @@ defmodule WorldLink.Identity do
     end
   end
 
-  defp get_user_by_username(user) when is_struct(user), do: user
-
+  @spec verify_user_and_password(User.t(), String.t()) ::
+          {:error, :unauthenticated} | {:ok, User.t()}
   @doc """
   Verifies password and returns a tuple.
 
@@ -215,9 +242,11 @@ defmodule WorldLink.Identity do
 
       iex> verify_user_and_password(%User{}, incorrect_password)
       {:error, :unauthenticated}
+    
+      iex> verify_user_and_password(%OauthProfile{}, incorrect_password)
+      {:error, :invalid_params}
 
   """
-
   def verify_user_and_password(%User{} = user, password) do
     if User.valid_password?(user, password) do
       {:ok, user}
@@ -226,22 +255,9 @@ defmodule WorldLink.Identity do
     end
   end
 
-  @doc """
-  Gets a user by oauth credentials.
+  def verify_user_and_password(_, _), do: {:error, :invalid_params}
 
-  ## Examples
-
-      iex> get_oauth_user("some-correct-email")
-      %User{}
-
-      iex> get_oauth_user("some-incorrect-email")
-      nil
-
-  """
-  def get_oauth_user(email) when is_binary(email) do
-    Repo.get_by(User, normalized_email: email |> String.downcase())
-  end
-
+  @spec get_oauth_user(String.t() | any(), atom() | any()) :: User.t() | nil
   @doc """
   Gets a user by oauth credentials.
 
@@ -257,6 +273,11 @@ defmodule WorldLink.Identity do
   def get_oauth_user(provider_uid, oauth_provider)
       when is_binary(provider_uid) and is_atom(oauth_provider) do
     Repo.get_by(OauthProfile, provider_uid: provider_uid, oauth_provider: oauth_provider)
+    |> Repo.preload(:user)
+    |> case do
+      %OauthProfile{} = oauth_profile -> oauth_profile.user
+      nil -> nil
+    end
   end
 
   def get_oauth_user(_provider_uid, _oauth_provider), do: nil

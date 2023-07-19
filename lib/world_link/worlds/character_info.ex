@@ -27,6 +27,17 @@ defmodule WorldLink.Worlds.CharacterInfo do
     timestamps()
   end
 
+  @type t() :: %__MODULE__{
+          __meta__: Ecto.Schema.Metadata.t(),
+          id: Ecto.ULID.t(),
+          data: %{} | map(),
+          deleted: boolean(),
+          deleted_at: DateTime.t() | nil,
+          character_id: Ecto.ULID.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
   def changeset(assoc_changeset, bio_attrs) do
     assoc_changeset
     |> cast(bio_attrs, @required_fields)

@@ -38,6 +38,17 @@ defmodule WorldLink.Worlds.Character do
     timestamps()
   end
 
+  @type t() :: %__MODULE__{
+          __meta__: Ecto.Schema.Metadata.t(),
+          id: Ecto.ULID.t(),
+          name: String.t(),
+          deleted: boolean(),
+          deleted_at: DateTime.t() | nil,
+          user_id: Ecto.ULID.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
   def character_changeset(changeset, attrs) do
     changeset
     |> cast(attrs, [:name])

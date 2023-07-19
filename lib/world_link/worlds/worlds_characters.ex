@@ -16,6 +16,14 @@ defmodule WorldLink.Worlds.WorldsCharacters do
     belongs_to(:world, World, primary_key: true)
   end
 
+  @type t() :: %__MODULE__{
+          __meta__: Ecto.Schema.Metadata.t(),
+          deleted: boolean(),
+          deleted_at: DateTime.t() | nil,
+          character_id: Ecto.ULID.t(),
+          world_id: Ecto.ULID.t()
+        }
+
   def changeset(assoc_changeset, attrs) do
     assoc_changeset
     |> cast(attrs, @required_fields)

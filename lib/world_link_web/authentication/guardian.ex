@@ -17,7 +17,7 @@ defmodule WorldLinkWeb.Authentication.Guardian do
 
   def resource_from_claims(%{"sub" => id}) do
     case Identity.get_user!(id) do
-      nil -> {:error, :not_found}
+      %Ecto.NoResultsError{} -> {:error, :not_found}
       resource -> {:ok, resource}
     end
   end

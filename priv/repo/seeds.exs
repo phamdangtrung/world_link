@@ -1,4 +1,6 @@
+alias WorldLink.Images.{Album, AlbumsImages, Image}
 alias WorldLink.{Identity, Worlds}
+import Ecto
 
 {:ok, user} =
   Identity.create_user(%{
@@ -34,5 +36,29 @@ Worlds.assign_characters_to_a_world(world_a, [character_a, character_b])
 
 main_timeline = world_a.main_timeline
 
-{:ok, tci_a} = Worlds.assign_a_character_info_to_a_timeline(main_timeline, bio_a)
-{:ok, tci_b} = Worlds.assign_a_character_info_to_a_timeline(main_timeline, bio_b)
+{:ok, _tci_a} = Worlds.assign_a_character_info_to_a_timeline(main_timeline, bio_a)
+{:ok, _tci_b} = Worlds.assign_a_character_info_to_a_timeline(main_timeline, bio_b)
+
+{:ok, album} =
+  user
+  |> build_assoc(:albums)
+  |> Album.new_album_changeset(%{title: "Test Album", description: "Testing"})
+  |> WorldLink.Repo.insert()
+
+{:ok, image} =
+  user
+  |> build_assoc(:images)
+  |> Image.changeset(%{
+    key: "test",
+    file_name: "test_a.jpg",
+    file_size: 100,
+    content_type: "application/jpeg",
+    title: "test_image"
+  })
+  |> WorldLink.Repo.insert()
+
+{:ok, _} =
+  album
+  |> build_assoc(:albums_images)
+  |> AlbumsImages.changeset(%{image_id: image.id, album_id: album.id})
+  |> WorldLink.Repo.insert()

@@ -48,7 +48,7 @@ defmodule Support.Factories.IdentityFactory do
   def oauth_factory(attrs) do
     %OauthProfile{
       provider_uid: Faker.Internet.user_name(),
-      oauth_provider: OauthProfile.supported_providers() |> Enum.random()
+      oauth_provider: @supported_providers |> Enum.random()
     }
     |> merge_attributes(attrs)
     |> evaluate_lazy_attributes()

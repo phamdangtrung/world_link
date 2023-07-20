@@ -163,7 +163,9 @@ defmodule WorldLink.WorldsTest do
       %{regular_user: regular_user}
     end
 
-    test "should successfully assign all given characters to a world", %{regular_user: regular_user} do
+    test "should successfully assign all given characters to a world", %{
+      regular_user: regular_user
+    } do
       character_a = WorldsFactory.build(:character, user: regular_user) |> WorldsFactory.insert()
       character_b = WorldsFactory.build(:character, user: regular_user) |> WorldsFactory.insert()
       world = WorldsFactory.build(:world, user: regular_user) |> WorldsFactory.insert()
@@ -172,7 +174,9 @@ defmodule WorldLink.WorldsTest do
       assert is_list(result)
     end
 
-    test "should return {:error, :empty_list} when given a list with no item", %{regular_user: regular_user} do
+    test "should return {:error, :empty_list} when given a list with no item", %{
+      regular_user: regular_user
+    } do
       world = WorldsFactory.build(:world, user: regular_user) |> WorldsFactory.insert()
 
       {status, result} = Worlds.assign_characters_to_a_world(world, [])
@@ -193,6 +197,7 @@ defmodule WorldLink.WorldsTest do
 
       %{regular_user: regular_user}
     end
+
     test "should successfully assign a given character to a world", %{regular_user: regular_user} do
       character = WorldsFactory.build(:character, user: regular_user) |> WorldsFactory.insert()
       world = WorldsFactory.build(:world, user: regular_user) |> WorldsFactory.insert()
@@ -202,7 +207,9 @@ defmodule WorldLink.WorldsTest do
       assert %WorldsCharacters{} = result
     end
 
-    test "should return {:error, %Ecto.Changeset{}} when re-assign a character", %{regular_user: regular_user} do
+    test "should return {:error, %Ecto.Changeset{}} when re-assign a character", %{
+      regular_user: regular_user
+    } do
       character = WorldsFactory.build(:character, user: regular_user) |> WorldsFactory.insert()
       world = WorldsFactory.build(:world, user: regular_user) |> WorldsFactory.insert()
 
@@ -212,7 +219,9 @@ defmodule WorldLink.WorldsTest do
       assert %Ecto.Changeset{} = result
     end
 
-    test "should return {:error, :invalid_params} when given invalid parameters", %{regular_user: regular_user} do
+    test "should return {:error, :invalid_params} when given invalid parameters", %{
+      regular_user: _regular_user
+    } do
       {status, result} = Worlds.assign_a_character_to_a_world(nil, nil)
       assert status == :error
       assert result == :invalid_params

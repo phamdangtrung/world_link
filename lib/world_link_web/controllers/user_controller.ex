@@ -15,10 +15,9 @@ defmodule WorldLinkWeb.UserController do
     response(200, "Ok", Schema.ref(:Users))
   end
 
-  def index(conn, %{"page" => page, "page_size" => page_size}) do
-    {page, _} = Integer.parse(page)
+  def index(conn, %{"page_size" => page_size}) do
     {page_size, _} = Integer.parse(page_size)
-    users = Identity.list_users(page: page, page_size: page_size)
+    users = Identity.list_users(%{page_size: page_size})
 
     render(conn, :index, users: users)
   end

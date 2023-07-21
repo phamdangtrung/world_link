@@ -1,5 +1,7 @@
 defmodule WorldLink.Identity.User do
-  @moduledoc false
+  @moduledoc """
+  Schema for User
+  """
 
   use WorldLink.Schema
   import Ecto.Changeset

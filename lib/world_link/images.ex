@@ -139,6 +139,21 @@ defmodule WorldLink.Images do
   end
 
   @spec update_album_count(Album.t() | any()) :: Album.t() | {:error, :invalid_params}
+  @doc """
+  Updates the total number of images in an album.
+
+  ## Examples
+
+      iex> update_album_count(%Album{})
+      :ok
+
+      iex> update_album_count(%Album{})
+      :error
+
+      iex> update_album_count(%Album{})
+      {:error, :invalid_params}
+
+  """
   def update_album_count(%Album{} = album) do
     attrs = %{count: count_images(album)}
 
@@ -146,6 +161,10 @@ defmodule WorldLink.Images do
       Album.album_count_changeset(album, attrs)
       |> repo.update()
     end)
+    |> case do
+      {:ok, {:ok, %Album{}}} -> :ok
+      _ -> :error
+    end
   end
 
   def(update_album_count(_), do: {:error, :invalid_params})
@@ -157,6 +176,29 @@ defmodule WorldLink.Images do
     |> Repo.aggregate(:count, :image_id)
   end
 
+  @spec delete_album(binary) :: {:ok, Album.t()} | {:error, :not_found}
+  @doc """
+  Deletes an album.
+
+  ## Examples
+
+      iex> delete_album(album_id)
+      {:ok, %Album{}}
+
+      iex> delete_album(album_id)
+      {:error, :not_found}
+
+      iex> delete_album(any())
+      {:error, :invalid_params}
+
+  """
   def delete_album(album_id) when is_binary(album_id) do
+    get_album(album_id)
+    |> case do
+      %Album{} = album -> Repo.delete(album)
+      _ -> {:error, :not_found}
+    end
   end
+
+  def delete_album(_), do: {:error, :invalid_params}
 end

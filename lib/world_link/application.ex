@@ -18,6 +18,7 @@ defmodule WorldLink.Application do
       WorldLinkWeb.Endpoint,
       # Start a worker by calling: WorldLink.Worker.start_link(arg)
       {WorldLink.Workers.DatabaseCleanupWorker, %{}},
+      # Finch
       {Finch, name: WorldLink.Finch}
     ]
 

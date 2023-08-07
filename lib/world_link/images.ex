@@ -2,7 +2,7 @@ defmodule WorldLink.Images do
   @moduledoc """
   The Images context.
   """
-  alias Ecto.{Changeset}
+  alias Ecto.{Changeset, Multi}
   alias WorldLink.Identity.User
   alias WorldLink.Images.{Album, AlbumsImages, Image}
   alias WorldLink.Repo
@@ -10,7 +10,7 @@ defmodule WorldLink.Images do
   import Ecto
   import Ecto.Query, warn: false
 
-  @spec add_to_album(Album.t() | any(), list(Image.t())) ::
+  @spec add_to_album(Album.t() | any(), list(Image.t() | Image.t() | any())) ::
           {:ok, non_neg_integer()}
           | {:error, :no_change}
           | {:error, :invalid_params}
@@ -21,6 +21,9 @@ defmodule WorldLink.Images do
 
       iex> add_to_album(%Album{}, [%Image{}, ...])
       {:ok, affected_rows}
+
+      iex> add_to_album(%Album{}, %Image{})
+      {:ok, 1}
 
       iex> add_to_album(%Album{}, [%Image{}, ...])
       {:error, :no_change}
@@ -41,6 +44,19 @@ defmodule WorldLink.Images do
     |> case do
       {:ok, {0, _}} -> {:error, :no_change}
       {:ok, {affected_rows, _}} -> {:ok, affected_rows}
+      _ -> {:error, :no_change}
+    end
+  end
+
+  def add_to_album(%Album{} = album, %Image{} = image) do
+    Repo.transaction(fn repo ->
+      album
+      |> build_assoc(:albums_images)
+      |> AlbumsImages.changeset(%{album_id: album.id, image_id: image.id})
+      |> repo.insert()
+    end)
+    |> case do
+      {:ok, {:ok, %AlbumsImages{}}} -> {:ok, 1}
       _ -> {:error, :no_change}
     end
   end
@@ -95,7 +111,7 @@ defmodule WorldLink.Images do
 
   @spec get_album(String.t() | any()) :: Album.t() | {:error, :invalid_params}
   @doc """
-  Returns an album with a given album id
+  Returns an album with a given album id without loading any image.
 
   ## Examples
 
@@ -113,6 +129,26 @@ defmodule WorldLink.Images do
   def get_album(_) do
     {:error, :invalid_params}
   end
+
+  @spec get_album_with_images(String.t() | any()) :: Album.t() | {:error, :invalid_params}
+  @doc """
+  Returns an album and its associated images with a given album id.
+
+  ## Examples
+
+      iex> get_album_with_image(album_id)
+      %Album{}
+
+      iex> get_album_with_image(nil)
+      {:error, :invalid_params}
+
+  """
+  def get_album_with_images(album_id) when is_binary(album_id) do
+    Repo.get_by(Album, id: album_id)
+    |> preload(:images)
+  end
+
+  def get_album_with_images(_), do: {:error, :invalid_params}
 
   @spec list_albums(User.t() | any()) :: list(Album.t()) | {:error, :invalid_params}
   @doc """
@@ -138,17 +174,20 @@ defmodule WorldLink.Images do
     {:error, :invalid_params}
   end
 
-  @spec update_album_count(Album.t() | any()) :: Album.t() | {:error, :invalid_params}
+  @spec update_album_count(Album.t() | any()) ::
+          {:ok, Album.t()}
+          | {:error, Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
   Updates the total number of images in an album.
 
   ## Examples
 
       iex> update_album_count(%Album{})
-      :ok
+      {:ok, %Album{}}
 
       iex> update_album_count(%Album{})
-      :error
+      {:error, %Changeset{}}
 
       iex> update_album_count(%Album{})
       {:error, :invalid_params}
@@ -162,8 +201,8 @@ defmodule WorldLink.Images do
       |> repo.update()
     end)
     |> case do
-      {:ok, {:ok, %Album{}}} -> :ok
-      _ -> :error
+      {_, {:ok, %Album{} = album}} -> {:ok, album}
+      {_, {:error, %Changeset{} = changeset}} -> {:error, changeset}
     end
   end
 
@@ -176,29 +215,93 @@ defmodule WorldLink.Images do
     |> Repo.aggregate(:count, :image_id)
   end
 
-  @spec delete_album(binary) :: {:ok, Album.t()} | {:error, :not_found}
+  @spec update_album(Album.t() | any(), %{} | map() | any()) ::
+          {:ok, Album.t()}
+          | {:error, Changeset.t()}
+          | {:error, :invalid_params}
   @doc """
-  Deletes an album.
+  Updates an album's attributes
 
   ## Examples
 
-      iex> delete_album(album_id)
+      iex> update_album(%Album{}, %{})
       {:ok, %Album{}}
 
-      iex> delete_album(album_id)
-      {:error, :not_found}
+      iex> update_album(%Album{}, %{})
+      {:error, %Changeset{}}
 
-      iex> delete_album(any())
+      iex> update_album(%Image{}, %{})
       {:error, :invalid_params}
 
   """
-  def delete_album(album_id) when is_binary(album_id) do
-    get_album(album_id)
+  def update_album(%Album{} = album, attrs) do
+    Repo.transaction(fn repo ->
+      repo.update(
+        album
+        |> Album.album_changeset(attrs)
+      )
+    end)
     |> case do
-      %Album{} = album -> Repo.delete(album)
-      _ -> {:error, :not_found}
+      {_, {:ok, album}} -> {:ok, album}
+      {_, {:error, changeset}} -> {:error, changeset}
+    end
+  end
+
+  def update_album(_, _), do: {:error, :invalid_params}
+
+  @spec delete_album(Album.t() | any()) ::
+          :ok
+          | {:error, :invalid_params}
+          | {:error, atom(), Changeset.t() | any()}
+  @doc """
+  Deletes an album WITHOUT deleting any image.
+
+  ## Examples
+
+      iex> delete_album(%Album{})
+      :ok
+
+      iex> delete_album(%Album{})
+      {:error, atom(), error}
+
+      iex> delete_album("123")
+      {:error, :invalid_params}
+
+  """
+  def delete_album(%Album{id: album_id} = album) do
+    Multi.new()
+    |> Multi.delete_all(
+      :delete_all_associated_albums_images,
+      from(ai in AlbumsImages,
+        where: ai.album_id == ^album_id
+      ),
+      []
+    )
+    |> Multi.delete(
+      :delete_album,
+      album,
+      []
+    )
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{delete_all_associated_albums_images: _, delete_album: album}} -> {:ok, album}
+      {:error, name, error, _} -> {:error, name, error}
     end
   end
 
   def delete_album(_), do: {:error, :invalid_params}
+
+  def create_image(%User{} = user, image_attrs) do
+    Repo.transaction(fn repo ->
+      user
+      |> build_assoc(:images)
+      |> Image.changeset(image_attrs)
+      |> repo.update
+    end)
+    |> case do
+      {:ok, {:ok, %Image{} = image}} -> {:ok, image}
+      {:ok, {:error, %Changeset{} = changeset}} -> {:error, changeset}
+      _ -> {:error, :unknown_error}
+    end
+  end
 end

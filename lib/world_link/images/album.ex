@@ -66,4 +66,23 @@ defmodule WorldLink.Images.Album do
     |> cast(attrs, [:count])
     |> validate_required([:count])
   end
+
+  def album_changeset(album, attrs) do
+    album
+    |> cast(attrs, [:title, :description, :nsfw, :shared, :url])
+    |> validate_length(:title, max: 255)
+    |> validate_length(:description, max: 2000)
+  end
+
+  def album_nsfw_changeset(album, %{nsfw: current_setting} = _attrs)
+      when is_boolean(current_setting) do
+    album
+    |> cast(%{nsfw: !current_setting}, [:nsfw])
+  end
+
+  def album_shared_changeset(album, %{shared: current_setting} = _attrs)
+      when is_boolean(current_setting) do
+    album
+    |> cast(%{nsfw: !current_setting}, [:shared])
+  end
 end

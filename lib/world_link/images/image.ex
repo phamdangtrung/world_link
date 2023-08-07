@@ -64,9 +64,8 @@ defmodule WorldLink.Images.Image do
           updated_at: DateTime.t()
         }
 
-  @doc false
-  def changeset(image, attrs) do
-    image
+  def changeset(assoc_changeset, attrs) do
+    assoc_changeset
     |> cast(attrs, [
       :artist,
       :artist_contact,

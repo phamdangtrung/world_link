@@ -39,9 +39,33 @@ defmodule WorldLink.Images.Image do
     timestamps()
   end
 
-  @doc false
-  def changeset(image, attrs) do
-    image
+  @type t() :: %__MODULE__{
+          __meta__: Ecto.Schema.Metadata.t(),
+          id: Ecto.ULID.t(),
+          artist: String.t() | nil,
+          artist_contact: String.t() | nil,
+          commission: boolean(),
+          commissioner: String.t() | nil,
+          commissioner_contact: String.t() | nil,
+          content_type: String.t(),
+          date: DateTime.t(),
+          description: String.t(),
+          exif: %{} | map(),
+          file_name: String.t(),
+          file_size: non_neg_integer(),
+          gore: boolean(),
+          key: String.t(),
+          nsfw: boolean(),
+          sensitive: boolean(),
+          shared: boolean(),
+          title: String.t(),
+          user_id: Ecto.ULID.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
+  def changeset(assoc_changeset, attrs) do
+    assoc_changeset
     |> cast(attrs, [
       :artist,
       :artist_contact,

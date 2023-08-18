@@ -17,7 +17,9 @@ defmodule WorldLink.Application do
       # Start the Endpoint (http/https)
       WorldLinkWeb.Endpoint,
       # Start a worker by calling: WorldLink.Worker.start_link(arg)
-      {WorldLink.Workers.DatabaseCleanupWorker, %{}}
+      {WorldLink.Workers.DatabaseCleanupWorker, %{}},
+      # Finch
+      {Finch, name: WorldLink.Finch}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

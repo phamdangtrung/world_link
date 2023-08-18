@@ -3,6 +3,7 @@
       "user",
       "config",
       "database",
-      "feature"
+      "feature",
+      "dependencies"
     ]
 }

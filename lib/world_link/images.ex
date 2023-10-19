@@ -316,7 +316,7 @@ defmodule WorldLink.Images do
       user
       |> build_assoc(:images)
       |> Image.changeset(image_attrs)
-      |> repo.update
+      |> repo.insert()
     end)
     |> case do
       {:ok, {:ok, %Image{} = image}} -> {:ok, image}

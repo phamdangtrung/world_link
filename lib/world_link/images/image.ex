@@ -3,7 +3,8 @@ defmodule WorldLink.Images.Image do
   Image schema
   """
   alias WorldLink.Identity.User
-  alias WorldLink.Images.{Album, AlbumsImages}
+  alias WorldLink.Images.{Album, AlbumsImages, ImageUrl}
+  import Ecto
   import Ecto.Changeset
   use WorldLink.Schema
 
@@ -27,6 +28,7 @@ defmodule WorldLink.Images.Image do
     field(:url, :string)
 
     has_many(:albums_images, AlbumsImages)
+    has_many(:image_urls, ImageUrl)
 
     many_to_many(
       :albums,
@@ -91,5 +93,11 @@ defmodule WorldLink.Images.Image do
       :exif,
       :title
     ])
+  end
+
+  def changeset_add_original_image_url(image, image_url_attrs) do
+    image
+    |> build_assoc(:image_urls)
+    |> ImageUrl.original_image_changeset(image_url_attrs)
   end
 end

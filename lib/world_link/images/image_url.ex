@@ -3,12 +3,13 @@ defmodule WorldLink.Images.ImageUrl do
   Image schema
   """
   alias WorldLink.Images.Image
+  import Ecto.Changeset
   use WorldLink.Schema
 
   @image_type [:thumbnail, :preview, :original]
 
   schema "image_urls" do
-    field(:type, Ecto.Enum, values: @image_type)
+    field(:type, Ecto.Enum, values: @image_type, default: :original)
     field(:s3_url, :string)
     field(:url, :string)
 
@@ -26,6 +27,12 @@ defmodule WorldLink.Images.ImageUrl do
           inserted_at: DateTime.t(),
           updated_at: DateTime.t()
         }
+
+  def original_image_changeset(assoc_changeset, image_url_attrs) do
+    assoc_changeset
+    |> cast(image_url_attrs, [:type, :s3_url, :url])
+    |> validate_required([:type, :s3_url, :url])
+  end
 
   def image_types, do: @image_type
 end

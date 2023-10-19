@@ -291,6 +291,26 @@ defmodule WorldLink.Images do
 
   def delete_album(_), do: {:error, :invalid_params}
 
+  @spec create_image(User.t() | any(), %{} | map() | any()) ::
+          {:ok, Image.t()} | {:error, Changeset.t()} | {:error, :unknown_error}
+  @doc """
+  Create an image for a given user
+
+  ## Examples
+
+      iex> create_image(%User{}, %{})
+      {:ok, %Image{}}
+
+      iex> create_image(%User{}, %{})
+      {:error, %Changeset{}}
+
+      iex> create_image(%User{}, %{})
+      {:error, :unknown_error}
+
+      iex> create_image(%User{}, %{})
+      {:error, :invalid_params}
+
+  """
   def create_image(%User{} = user, image_attrs) do
     Repo.transaction(fn repo ->
       user
@@ -304,4 +324,6 @@ defmodule WorldLink.Images do
       _ -> {:error, :unknown_error}
     end
   end
+
+  def create_image(_, _), do: {:error, :invalid_params}
 end

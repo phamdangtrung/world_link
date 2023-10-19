@@ -197,7 +197,7 @@ defmodule WorldLink.Identity do
 
       iex> get_user_by_email("foo")
       {:error, :not_found}
-    
+
       iex> get_user_by_email(123)
       {:error, :invalid_params}
 
@@ -242,7 +242,7 @@ defmodule WorldLink.Identity do
 
       iex> verify_user_and_password(%User{}, incorrect_password)
       {:error, :unauthenticated}
-    
+
       iex> verify_user_and_password(%OauthProfile{}, incorrect_password)
       {:error, :invalid_params}
 

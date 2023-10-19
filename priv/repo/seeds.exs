@@ -49,7 +49,6 @@ main_timeline = world_a.main_timeline
   user
   |> build_assoc(:images)
   |> Image.changeset(%{
-    key: "test",
     file_name: "test_a.jpg",
     file_size: 100,
     content_type: "application/jpeg",

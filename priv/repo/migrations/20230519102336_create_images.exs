@@ -15,12 +15,11 @@ defmodule WorldLink.Repo.Migrations.CreateImages do
       add(:file_name, :string, size: 255)
       add(:file_size, :integer)
       add(:gore, :boolean, default: false, null: false)
-      add(:key, :string, size: 40)
       add(:nsfw, :boolean, default: false, null: false)
       add(:sensitive, :boolean, default: false, null: false)
       add(:shared, :boolean, default: false, null: false)
       add(:title, :string, size: 255)
-      add(:url, :string)
+      add(:url, :string, size: 1600)
 
       add(:user_id, references(:users))
       timestamps()

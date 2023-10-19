@@ -12,6 +12,7 @@ defmodule WorldLink.Identity.User do
   alias WorldLink.Worlds.{Character, World}
 
   @required_fields [:email, :name, :username, :password]
+  @roles [:user, :admin]
 
   schema "users" do
     field(:activated, :boolean, default: false)
@@ -23,7 +24,7 @@ defmodule WorldLink.Identity.User do
     field(:normalized_username, :string)
     field(:password, :string, virtual: true, redact: true)
     field(:hashed_password, :string, redact: true)
-    field(:role_name, Ecto.Enum, values: [:user, :admin])
+    field(:role_name, Ecto.Enum, values: @roles)
     field(:settings, :map, default: %{})
     field(:deleted, :boolean, default: false)
     field(:deleted_at, :utc_datetime)
@@ -175,4 +176,6 @@ defmodule WorldLink.Identity.User do
     |> build_assoc(:images)
     |> Image.changeset(image)
   end
+
+  def user_roles, do: @roles
 end

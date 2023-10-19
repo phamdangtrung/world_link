@@ -20,11 +20,11 @@ defmodule WorldLink.Images.Image do
     field(:file_name, :string)
     field(:file_size, :integer)
     field(:gore, :boolean, default: false)
-    field(:key, :string)
     field(:nsfw, :boolean, default: false)
     field(:sensitive, :boolean, default: false)
     field(:shared, :boolean, default: false)
     field(:title, :string)
+    field(:url, :string)
 
     has_many(:albums_images, AlbumsImages)
 
@@ -54,11 +54,11 @@ defmodule WorldLink.Images.Image do
           file_name: String.t(),
           file_size: non_neg_integer(),
           gore: boolean(),
-          key: String.t(),
           nsfw: boolean(),
           sensitive: boolean(),
           shared: boolean(),
           title: String.t(),
+          url: String.t(),
           user_id: Ecto.ULID.t(),
           inserted_at: DateTime.t(),
           updated_at: DateTime.t()
@@ -79,13 +79,12 @@ defmodule WorldLink.Images.Image do
       :file_name,
       :file_size,
       :gore,
-      :key,
       :nsfw,
       :sensitive,
-      :title
+      :title,
+      :url
     ])
     |> validate_required([
-      :key,
       :file_name,
       :file_size,
       :content_type,

@@ -10,6 +10,7 @@ defmodule WorldLink.Repo.Migrations.AddTableWorldsCharacters do
     create(index(:worlds_characters, [:world_id]))
     create(index(:worlds_characters, [:character_id]))
 
+    # Need to rename the index
     create(
       unique_index(:worlds_characters, [:world_id, :character_id],
         name: :world_id_character_id_unique_index

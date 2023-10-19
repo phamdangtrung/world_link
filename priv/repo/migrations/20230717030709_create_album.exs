@@ -8,7 +8,7 @@ defmodule WorldLink.Repo.Migrations.CreateAlbum do
       add(:nsfw, :boolean, default: false, null: false)
       add(:shared, :boolean, default: false, null: false)
       add(:title, :string, size: 255)
-      add(:url, :string)
+      add(:url, :string, size: 1600)
 
       add(:user_id, references(:users))
       timestamps()

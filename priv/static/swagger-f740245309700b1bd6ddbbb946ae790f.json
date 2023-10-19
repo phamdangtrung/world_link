@@ -1,0 +1,113 @@
+{
+  "info": {
+    "version": "1.0",
+    "title": "World Link API",
+    "basePath": "/api"
+  },
+  "host": "localhost:4000",
+  "definitions": {
+    "User": {
+      "description": "A user of the application",
+      "example": {
+        "data": [
+          {
+            "activated": true,
+            "activated_at": "2023-03-30 13:10:52",
+            "email": "john@doe.com",
+            "id": "0921df04-cefc-11ed-bba2-32e44bcb0a53",
+            "inserted_at": "2023-03-30 13:10:52",
+            "name": "John Doe",
+            "role_name": "user",
+            "updated_at": "2023-03-30 13:10:52",
+            "username": "john_doe"
+          }
+        ]
+      },
+      "properties": {
+        "activated": {
+          "description": "Has user confirmed their email?",
+          "type": "boolean"
+        },
+        "activated_at": {
+          "description": "Time when user confirmed their email",
+          "type": "utc_datetime"
+        },
+        "email": {
+          "description": "Email registered",
+          "type": "string"
+        },
+        "id": {
+          "description": "ULID of a user",
+          "type": "ulid"
+        },
+        "name": {
+          "description": "Name of user",
+          "type": "string"
+        },
+        "password": {
+          "description": "Password of user",
+          "type": "string"
+        },
+        "role_name": {
+          "description": "Role of user",
+          "type": "string"
+        },
+        "username": {
+          "description": "Username registered",
+          "type": "string"
+        }
+      },
+      "required": [
+        "password",
+        "role_name",
+        "email",
+        "username",
+        "name"
+      ],
+      "title": "User",
+      "type": "object"
+    },
+    "Users": {
+      "description": "A collection of Users",
+      "items": {
+        "$ref": "#/definitions/User"
+      },
+      "title": "Users",
+      "type": "array"
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "in": "header",
+      "name": "Authorization",
+      "type": "apiKey"
+    }
+  },
+  "paths": {
+    "/api/users": {
+      "get": {
+        "description": "List all user records. The default page and page size is 1 and 10 respectively",
+        "operationId": "WorldLinkWeb.UserController.index",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "schema": {
+              "$ref": "#/definitions/Users"
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "List all user records",
+        "tags": [
+          "User"
+        ]
+      }
+    }
+  },
+  "swagger": "2.0"
+}

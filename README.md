@@ -69,6 +69,7 @@ Features (these features are still being developed and subjected to change):
   * Timeline-based articles
   * Wiki-like article for character's and user's profile, also world and timeline.
   * Personal profile's article.
+* More
 
 
 <!-- GETTING STARTED -->
@@ -157,10 +158,9 @@ See the [open issues](https://github.com/phamdangtrung/world_link/issues) for a 
 <!-- CONTRIBUTING -->
 ## Contributing
 
-<p>Contributions are **greatly appreciated**. Though I have the **RIGHTS** to **reject** any contribution I deem unsuitable!!</p>
+<p>Contributions are *greatly appreciated*. Though I have the *RIGHTS* to reject any contribution I deem unsuitable!!</p>
 <p>If you have any suggestion that would make this better and want to contribute, please fork the repo and create a pull request.</p>
 <p>If you have no knowledge about coding, you can also simply open an issue with the tag "enhancement" or "feature-request".</p>
-<p>Lastly, if you like my project, you can either consider donating or giving this repo a star! Thanks!</p>
 
 ### How to open a pull request:
 1. Fork the Project
@@ -173,6 +173,7 @@ See the [open issues](https://github.com/phamdangtrung/world_link/issues) for a 
 1. feature
 2. bug
 3. hotfix
+4. enhancement
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -191,14 +192,14 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 You can contact me directly via any platform in this link:
 
-Trung Pham - https://phamdangtrung.carrd.co/
+Trung Pham - trung@phamdangtrung.com
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
 <!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
+<!-- ## Acknowledgments
 
 Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
 
@@ -211,4 +212,4 @@ Use this space to list resources you find helpful and would like to give credit 
 * [Font Awesome](https://fontawesome.com)
 * [React Icons](https://react-icons.github.io/react-icons/search)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p> -->

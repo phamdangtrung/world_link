@@ -1,11 +1,10 @@
-defmodule WorldLink.Repo.Migrations.CreateImageUrls do
+defmodule WorldLink.Repo.Migrations.CreateSubimage do
   use Ecto.Migration
 
   def change do
-    create table(:image_urls) do
+    create table(:sub_images) do
       add(:type, :string, size: 20, null: false, default: "original")
-      add(:s3_url, :string, size: 1600)
-      add(:url, :string, size: 1600)
+      add(:keyname, :string, size: 1024)
 
       add(:image_id, references(:images))
       timestamps()

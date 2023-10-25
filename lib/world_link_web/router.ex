@@ -44,6 +44,7 @@ defmodule WorldLinkWeb.Router do
   # Other scopes may use custom stacks.
   scope "/api", WorldLinkWeb do
     pipe_through(:api)
+    post("/process", PageController, :process)
 
     scope "/users" do
       pipe_through([:auth, :admin])
@@ -52,7 +53,10 @@ defmodule WorldLinkWeb.Router do
   end
 
   scope "/api/swagger" do
-    forward("/", PhoenixSwagger.Plug.SwaggerUI, otp_app: :world_link, swagger_file: "swagger.json")
+    forward("/", PhoenixSwagger.Plug.SwaggerUI,
+      otp_app: :world_link,
+      swagger_file: "swagger.json"
+    )
   end
 
   # Enables LiveDashboard only for development

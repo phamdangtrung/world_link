@@ -1,4 +1,4 @@
-alias WorldLink.Images.{Album, AlbumsImages, Image, ImageUrl}
+alias WorldLink.Images.{Album, AlbumsImages, Image, SubImage}
 alias WorldLink.{Identity, Worlds}
 import Ecto
 
@@ -49,8 +49,8 @@ main_timeline = world_a.main_timeline
   user
   |> build_assoc(:images)
   |> Image.changeset(%{
-    file_name: "test_a.jpg",
-    file_size: 100,
+    original_filename: "test_a.jpg",
+    content_length: 100,
     content_type: "application/jpeg",
     title: "test_image"
   })
@@ -58,11 +58,10 @@ main_timeline = world_a.main_timeline
 
 {:ok, image_url} =
   image
-  |> build_assoc(:image_urls)
-  |> ImageUrl.original_image_changeset(%{
+  |> build_assoc(:sub_images)
+  |> SubImage.original_image_changeset(%{
     type: :original,
-    s3_url: "s3_url",
-    url: "url"
+    keyname: "test_keyname"
   })
   |> WorldLink.Repo.insert()
 

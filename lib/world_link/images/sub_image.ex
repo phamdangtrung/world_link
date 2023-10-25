@@ -1,4 +1,4 @@
-defmodule WorldLink.Images.ImageUrl do
+defmodule WorldLink.Images.SubImage do
   @moduledoc """
   Image schema
   """
@@ -8,10 +8,9 @@ defmodule WorldLink.Images.ImageUrl do
 
   @image_type [:thumbnail, :preview, :original]
 
-  schema "image_urls" do
+  schema "sub_images" do
     field(:type, Ecto.Enum, values: @image_type, default: :original)
-    field(:s3_url, :string)
-    field(:url, :string)
+    field(:keyname, :string)
 
     belongs_to(:image, Image)
     timestamps()
@@ -21,8 +20,7 @@ defmodule WorldLink.Images.ImageUrl do
           __meta__: Ecto.Schema.Metadata.t(),
           id: Ecto.ULID.t(),
           type: atom(),
-          s3_url: String.t(),
-          url: String.t(),
+          keyname: String.t(),
           image_id: Ecto.ULID.t(),
           inserted_at: DateTime.t(),
           updated_at: DateTime.t()
@@ -30,8 +28,10 @@ defmodule WorldLink.Images.ImageUrl do
 
   def original_image_changeset(assoc_changeset, image_url_attrs) do
     assoc_changeset
-    |> cast(image_url_attrs, [:type, :s3_url, :url])
-    |> validate_required([:type, :s3_url, :url])
+    |> cast(image_url_attrs, [:type, :keyname])
+    |> validate_required([:type, :keyname])
+    |> validate_length(:keyname, max: 1024)
+    |> validate_length(:type, max: 20)
   end
 
   def image_types, do: @image_type

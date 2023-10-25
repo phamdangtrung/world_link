@@ -1,15 +1,14 @@
 defmodule WorldLink.Images.SubImage do
   @moduledoc """
-  Image schema
+  SubImage schema
   """
   alias WorldLink.Images.Image
-  import Ecto.Changeset
   use WorldLink.Schema
 
-  @image_type [:thumbnail, :preview, :original]
+  @image_types [:thumbnail, :preview, :original]
 
   schema "sub_images" do
-    field(:type, Ecto.Enum, values: @image_type, default: :original)
+    field(:type, Ecto.Enum, values: @image_types, default: :original)
     field(:keyname, :string)
 
     belongs_to(:image, Image)
@@ -26,13 +25,22 @@ defmodule WorldLink.Images.SubImage do
           updated_at: DateTime.t()
         }
 
-  def original_image_changeset(assoc_changeset, image_url_attrs) do
-    assoc_changeset
-    |> cast(image_url_attrs, [:type, :keyname])
-    |> validate_required([:type, :keyname])
-    |> validate_length(:keyname, max: 1024)
-    |> validate_length(:type, max: 20)
+  def generate_sub_images(user_id, %Image{} = image, types)
+      when is_list(types) do
+    inserted_at = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    Enum.map(
+      types,
+      &%{
+        id: Ecto.ULID.generate(),
+        type: &1,
+        keyname: "#{&1}/#{user_id}/#{UUID.uuid1()}_#{image.original_filename}",
+        image_id: image.id,
+        inserted_at: inserted_at,
+        updated_at: inserted_at
+      }
+    )
   end
 
-  def image_types, do: @image_type
+  def image_types, do: @image_types
 end

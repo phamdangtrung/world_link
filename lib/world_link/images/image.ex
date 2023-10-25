@@ -4,7 +4,6 @@ defmodule WorldLink.Images.Image do
   """
   alias WorldLink.Identity.User
   alias WorldLink.Images.{Album, AlbumsImages, SubImage}
-  import Ecto
   import Ecto.Changeset
   use WorldLink.Schema
 
@@ -93,11 +92,5 @@ defmodule WorldLink.Images.Image do
       :exif,
       :title
     ])
-  end
-
-  def changeset_add_original_image_url(image, image_url_attrs) do
-    image
-    |> build_assoc(:image_urls)
-    |> SubImage.original_image_changeset(image_url_attrs)
   end
 end

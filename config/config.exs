@@ -143,7 +143,7 @@ config :commitlint,
 # Configuration for AWS
 config :ex_aws,
   debug_requests: true,
-  region: "local"
+  region: "us-east-1"
 
 config :ex_aws, :s3,
   scheme: "http://",

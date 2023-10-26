@@ -45,28 +45,19 @@ main_timeline = world_a.main_timeline
   |> Album.new_album_changeset(%{title: "Test Album", description: "Testing"})
   |> WorldLink.Repo.insert()
 
-{:ok, image} =
-  user
-  |> build_assoc(:images)
-  |> Image.changeset(%{
+{:ok, %{create_image: image}} =
+  WorldLink.Images.create_image(user, %{
     original_filename: "test_a.jpg",
     content_length: 100,
-    content_type: "application/jpeg",
+    content_type: "image/jpeg",
     title: "test_image"
   })
-  |> WorldLink.Repo.insert()
-
-{:ok, image_url} =
-  image
-  |> build_assoc(:sub_images)
-  |> SubImage.original_image_changeset(%{
-    type: :original,
-    keyname: "test_keyname"
-  })
-  |> WorldLink.Repo.insert()
+  |> IO.inspect()
 
 {:ok, _} =
   album
   |> build_assoc(:albums_images)
   |> AlbumsImages.changeset(%{image_id: image.id, album_id: album.id})
   |> WorldLink.Repo.insert()
+
+ExAws.S3.put_bucket("world-link", "us-east-1") |> ExAws.request()

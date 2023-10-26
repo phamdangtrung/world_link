@@ -20,15 +20,15 @@ defmodule WorldLink.Identity.OauthProfile do
   end
 
   @type t() :: %__MODULE__{
-    __meta__: Ecto.Schema.Metadata.t(),
-    oauth_provider: atom(),
-    provider_uid: String.t(),
-    deleted: boolean(),
-    deleted_at: DateTime.t() | nil,
-    user_id: Ecto.ULID.t(),
-    inserted_at: DateTime.t(),
-    updated_at: DateTime.t()
-  }
+          __meta__: Ecto.Schema.Metadata.t(),
+          oauth_provider: atom(),
+          provider_uid: String.t(),
+          deleted: boolean(),
+          deleted_at: DateTime.t() | nil,
+          user_id: Ecto.ULID.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
 
   def supported_providers, do: @supported_providers
 

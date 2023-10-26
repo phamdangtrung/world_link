@@ -2,6 +2,7 @@ defmodule WorldLink.Images.SubImage do
   @moduledoc """
   SubImage schema
   """
+  alias WorldLink.AwsUtils
   alias WorldLink.Images.Image
   use WorldLink.Schema
 
@@ -34,7 +35,7 @@ defmodule WorldLink.Images.SubImage do
       &%{
         id: Ecto.ULID.generate(),
         type: &1,
-        keyname: "#{&1}/#{user_id}/#{UUID.uuid1()}_#{image.original_filename}",
+        keyname: AwsUtils.generate_keyname(&1, user_id, image.original_filename),
         image_id: image.id,
         inserted_at: inserted_at,
         updated_at: inserted_at

@@ -2,6 +2,7 @@ defmodule WorldLink.Images do
   @moduledoc """
   The Images context.
   """
+  alias WorldLink.AwsUtils
   alias Ecto.{Changeset, Multi}
   alias WorldLink.Identity.User
   alias WorldLink.Images.{Image, SubImage}
@@ -42,7 +43,7 @@ defmodule WorldLink.Images do
       :create_sub_images,
       fn repo, %{create_image: image} ->
         entries =
-          SubImage.generate_sub_images(user.id, image, [:original])
+          SubImage.generate_sub_images(user.id, image, [:original, :preview ])
 
         case repo.insert_all(SubImage, entries) do
           {0, _} ->
@@ -60,10 +61,7 @@ defmodule WorldLink.Images do
           Enum.map(
             sub_images,
             fn sub_image ->
-              {:ok, url} =
-                :s3
-                |> ExAws.Config.new()
-                |> ExAws.S3.presigned_url(:post, "test-bucket", sub_image.keyname, expires_in: 60)
+              {:ok, url} = AwsUtils.generate_presigned_url(sub_image.keyname)
 
               %{
                 type: sub_image.type,
@@ -76,16 +74,6 @@ defmodule WorldLink.Images do
       end
     )
     |> Repo.transaction()
-
-    # Repo.transaction(fn repo ->
-
-    #   |> repo.insert()
-    # end)
-    # |> case do
-    #   {:ok, {:ok, %Image{} = image}} -> {:ok, image}
-    #   {:ok, {:error, %Changeset{} = changeset}} -> {:error, changeset}
-    #   _ -> {:error, :unknown_error}
-    # end
   end
 
   def create_image(_, _), do: {:error, :invalid_params}

@@ -140,6 +140,23 @@ config :commitlint,
     "revert"
   ]
 
+# Configuration for AWS
+config :ex_aws,
+  debug_requests: true,
+  region: "us-east-1"
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "localhost",
+  port: 4566,
+  access_key_id: "112233445566",
+  secret_access_key: "112233445566",
+  region: "us-east-1"
+
+config :ex_aws, :hackney_opts,
+  follow_redirect: true,
+  recv_timeout: 30_000
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

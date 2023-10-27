@@ -45,8 +45,12 @@ defmodule WorldLink.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      # Security
       {:bcrypt_elixir, "~> 3.0"},
       {:argon2_elixir, "~> 3.0"},
+      {:guardian, "~> 2.3"},
+
+      # Phoenix
       {:phoenix, "~> 1.7.0"},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.0"},
@@ -54,36 +58,55 @@ defmodule WorldLink.MixProject do
       {:phoenix_live_dashboard, "~> 0.6"},
       {:phoenix_live_view, "~> 0.18.3"},
       {:phoenix_view, "~> 2.0"},
+
+      # Database
       {:uuid, "~> 1.1"},
       {:ecto_sql, "~> 3.6"},
       {:ecto_psql_extras, "~> 0.6"},
       {:ecto_ulid_next, "~> 1.0"},
       {:postgrex, ">= 0.0.0"},
+
+      # Testing
       {:floki, ">= 0.30.0", only: :test},
+      {:faker, "~> 0.17", only: [:dev, :test]},
+      {:ex_machina, "~> 2.7.0", only: :test},
+
+      # Javascript
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
+
+      # Adapter
       {:swoosh, "~> 1.3"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
+
+      # OAuth
       {:ueberauth, "~> 0.7"},
       {:ueberauth_discord, "~> 0.6"},
       {:ueberauth_facebook, "~> 0.8"},
+
+      # 3rd party
       {:stripity_stripe, "~> 2.17"},
-      {:guardian, "~> 2.3"},
       {:phoenix_swagger, "~> 0.8"},
       {:ex_json_schema, "~> 0.5"},
       # {:dialyxir, "~> 1.2", only: [:dev, :test], runtime: false},
       {:commitlint, "~> 0.1.2"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
-      {:faker, "~> 0.17", only: [:dev, :test]},
-      {:ex_machina, "~> 2.7.0", only: :test},
+      {:sobelow, "~> 0.12", only: [:dev, :test], runtime: false},
+
+      # HTTP
       {:finch, "~> 0.13"},
       {:httpoison, "~> 2.1"},
-      {:sobelow, "~> 0.12", only: [:dev, :test], runtime: false}
+
+      # AWS
+      {:ex_aws, "~> 2.1"},
+      {:ex_aws_s3, "~> 2.0"},
+      {:hackney, "~> 1.9"},
+      {:sweet_xml, "~> 0.6"}
     ]
   end
 

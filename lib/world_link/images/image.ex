@@ -3,8 +3,7 @@ defmodule WorldLink.Images.Image do
   Image schema
   """
   alias WorldLink.Identity.User
-  alias WorldLink.Images.{Album, AlbumsImages, ImageUrl}
-  import Ecto
+  alias WorldLink.Images.{Album, AlbumsImages, SubImage}
   import Ecto.Changeset
   use WorldLink.Schema
 
@@ -14,12 +13,12 @@ defmodule WorldLink.Images.Image do
     field(:commission, :boolean, default: false)
     field(:commissioner, :string)
     field(:commissioner_contact, :string)
+    field(:content_length, :integer)
     field(:content_type, :string)
     field(:date, :utc_datetime)
     field(:description, :string)
     field(:exif, :map, default: %{})
-    field(:file_name, :string)
-    field(:file_size, :integer)
+    field(:original_filename, :string)
     field(:gore, :boolean, default: false)
     field(:nsfw, :boolean, default: false)
     field(:sensitive, :boolean, default: false)
@@ -28,7 +27,7 @@ defmodule WorldLink.Images.Image do
     field(:url, :string)
 
     has_many(:albums_images, AlbumsImages)
-    has_many(:image_urls, ImageUrl)
+    has_many(:sub_images, SubImage)
 
     many_to_many(
       :albums,
@@ -49,12 +48,12 @@ defmodule WorldLink.Images.Image do
           commission: boolean(),
           commissioner: String.t() | nil,
           commissioner_contact: String.t() | nil,
+          content_length: non_neg_integer(),
           content_type: String.t(),
           date: DateTime.t(),
           description: String.t(),
           exif: %{} | map(),
-          file_name: String.t(),
-          file_size: non_neg_integer(),
+          original_filename: String.t(),
           gore: boolean(),
           nsfw: boolean(),
           sensitive: boolean(),
@@ -74,12 +73,12 @@ defmodule WorldLink.Images.Image do
       :commission,
       :commissioner,
       :commissioner_contact,
+      :content_length,
       :content_type,
       :date,
       :description,
       :exif,
-      :file_name,
-      :file_size,
+      :original_filename,
       :gore,
       :nsfw,
       :sensitive,
@@ -87,17 +86,11 @@ defmodule WorldLink.Images.Image do
       :url
     ])
     |> validate_required([
-      :file_name,
-      :file_size,
+      :original_filename,
+      :content_length,
       :content_type,
       :exif,
       :title
     ])
-  end
-
-  def changeset_add_original_image_url(image, image_url_attrs) do
-    image
-    |> build_assoc(:image_urls)
-    |> ImageUrl.original_image_changeset(image_url_attrs)
   end
 end

@@ -3,7 +3,7 @@ defmodule WorldLink.Images do
   The Images context.
   """
   alias WorldLink.AwsUtils
-  alias Ecto.{Changeset, Multi}
+  alias Ecto.Multi
   alias WorldLink.Identity.User
   alias WorldLink.Images.{Image, SubImage}
   alias WorldLink.Repo
@@ -11,23 +11,55 @@ defmodule WorldLink.Images do
   import Ecto
   import Ecto.Query, warn: false
 
+  @spec create_images(User.t(), list()) ::
+          list()
+  @doc """
+  Create images for a given user
+
+  ## Examples
+
+  iex> create_images(%User{}, images)
+  []
+
+  """
+  def create_images(%User{} = user, images) when is_list(images) do
+    Enum.map(
+      images,
+      fn image ->
+        create_image(user, image)
+        |> case do
+          {:ok, presigned_urls} ->
+            %{
+              filename: image.original_filename,
+              success: true,
+              data: presigned_urls
+            }
+
+          {:error, message} ->
+            %{
+              filename: image.original_filename,
+              success: false,
+              data: message
+            }
+        end
+      end
+    )
+  end
+
   @spec create_image(User.t() | any(), %{} | map() | any()) ::
-          {:ok, Image.t()} | {:error, Changeset.t()} | {:error, :unknown_error}
+          {:ok, list()} | {:error, :internal_error} | {:error, :invalid_params}
   @doc """
   Create an image for a given user
 
   ## Examples
 
       iex> create_image(%User{}, %{})
-      {:ok, %Image{}}
+      {:ok, presigned_urls}
 
       iex> create_image(%User{}, %{})
-      {:error, %Changeset{}}
+      {:error, :internal_error}
 
-      iex> create_image(%User{}, %{})
-      {:error, :unknown_error}
-
-      iex> create_image(%User{}, %{})
+      iex> create_image(%User{}, "test")
       {:error, :invalid_params}
 
   """
@@ -43,7 +75,7 @@ defmodule WorldLink.Images do
       :create_sub_images,
       fn repo, %{create_image: image} ->
         entries =
-          SubImage.generate_sub_images(user.id, image, [:original, :preview ])
+          SubImage.generate_sub_images(user.id, image, [:original, :preview])
 
         case repo.insert_all(SubImage, entries) do
           {0, _} ->
@@ -74,6 +106,10 @@ defmodule WorldLink.Images do
       end
     )
     |> Repo.transaction()
+    |> case do
+      {:ok, %{create_presigned_urls: presigned_urls}} -> {:ok, presigned_urls}
+      {:error, _, _, _} -> {:error, :internal_error}
+    end
   end
 
   def create_image(_, _), do: {:error, :invalid_params}

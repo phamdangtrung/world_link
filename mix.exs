@@ -49,6 +49,7 @@ defmodule WorldLink.MixProject do
       {:bcrypt_elixir, "~> 3.0"},
       {:argon2_elixir, "~> 3.0"},
       {:guardian, "~> 2.3"},
+      {:corsica, "~> 2.1"},
 
       # Phoenix
       {:phoenix, "~> 1.7.0"},

@@ -17,6 +17,12 @@ defmodule WorldLinkWeb.Endpoint do
   #
   # You should set gzip to true if you are running phx.digest
   # when deploying your static files in production.
+  plug(Corsica,
+    origins: "*",
+    max_age: 600,
+    allow_headers: :all
+  )
+
   plug(Plug.Static,
     at: "/",
     from: :world_link,

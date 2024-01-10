@@ -143,14 +143,14 @@ config :commitlint,
 # Configuration for AWS
 config :ex_aws,
   debug_requests: true,
-  region: "us-east-1"
+  region: "us-east-1",
+  access_key_id: "test",
+  secret_access_key: "test"
 
 config :ex_aws, :s3,
   scheme: "http://",
   host: "localhost",
   port: 4566,
-  access_key_id: "112233445566",
-  secret_access_key: "112233445566",
   region: "us-east-1"
 
 config :ex_aws, :hackney_opts,

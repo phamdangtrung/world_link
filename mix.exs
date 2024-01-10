@@ -5,9 +5,9 @@ defmodule WorldLink.MixProject do
     [
       app: :world_link,
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.16",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [] ++ Mix.compilers() ++ [:phoenix_swagger],
+      compilers: Mix.compilers() ++ [:phoenix_swagger, :yecc],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),

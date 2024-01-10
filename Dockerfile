@@ -1,4 +1,4 @@
-FROM elixir:1.15.0-alpine
+FROM elixir:1.16.0-alpine
 
 RUN apk update && \
   apk add postgresql-client inotify-tools && \

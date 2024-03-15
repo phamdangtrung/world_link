@@ -5,7 +5,7 @@ defmodule WorldLink.AwsUtils do
 
   alias ExAws.S3
 
-  @available_regions ["us-east-1"]
+  # @available_regions ["us-east-1"]
   @bucket_name "world-link"
   @expiry_time 2
 

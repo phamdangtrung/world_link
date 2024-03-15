@@ -10,7 +10,7 @@ config :world_link, WorldLink.Repo,
   password: System.get_env("DB_PASSWORD"),
   hostname: System.get_env("DB_HOSTNAME"),
   port: System.get_env("DB_PORT"),
-  database: System.get_env("DB_DATABASE_TEST"),
+  database: System.get_env("DB_DATABASE"),
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 

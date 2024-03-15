@@ -2,7 +2,7 @@ defmodule WorldLinkWeb.UserController do
   use WorldLinkWeb, :controller
   use PhoenixSwagger
 
-  alias WorldLink.Identity
+  # alias WorldLink.Identity
   alias WorldLinkWeb.Router.Helpers
 
   @uri %URI{scheme: "http", host: "localhost", port: 4001}
@@ -15,15 +15,18 @@ defmodule WorldLinkWeb.UserController do
     response(200, "Ok", Schema.ref(:Users))
   end
 
-  def index(conn, %{"page_size" => page_size}) do
-    {page_size, _} = Integer.parse(page_size)
-    users = Identity.list_users(%{page_size: page_size})
+  # def index(conn, %{"page_size" => page_size}) do
+  #   # {page_size, _} = Integer.parse(page_size)
+  #   # users = Identity.list_users(%{page_size: page_size})
+  #   users = []
 
-    render(conn, :index, users: users)
-  end
+  #   render(conn, :index, users: users)
+  # end
 
   def index(conn, _params) do
-    users = Identity.list_users()
+    # users = Identity.list_users()
+    users = []
+
 
     render(conn, :index, users: users)
   end

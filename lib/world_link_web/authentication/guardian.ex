@@ -3,7 +3,7 @@ defmodule WorldLinkWeb.Authentication.Guardian do
   Implementation module for Guardian
   """
   use Guardian, otp_app: :world_link
-  alias WorldLink.Identity
+  alias WorldLink.User
 
   @refresh_token_ttl_in_days 30
   @access_token_ttl_in_hours 24
@@ -16,7 +16,7 @@ defmodule WorldLinkWeb.Authentication.Guardian do
   def subject_for_token(_, _), do: {:error, :reason_for_error}
 
   def resource_from_claims(%{"sub" => id}) do
-    case Identity.get_user!(id) do
+    case User.get_user_by_id(id) do
       %Ecto.NoResultsError{} -> {:error, :not_found}
       resource -> {:ok, resource}
     end

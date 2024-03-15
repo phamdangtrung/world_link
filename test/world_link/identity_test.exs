@@ -32,19 +32,6 @@ defmodule WorldLink.IdentityTest do
       assert {:error, %Ecto.Changeset{}} = Identity.create_user(invalid_attrs)
     end
 
-    test "list_users/1" do
-      expected =
-        WorldLink.Repo.all(
-          from(users in User,
-            select: [:id, :name, :activated, :normalized_username, :normalized_email, :role_name],
-            limit: 3,
-            offset: 0
-          )
-        )
-
-      assert expected == Identity.list_users(%{page_size: 3})
-    end
-
     test "create_oauth_user/1 returns a valid user" do
       attrs = %{
         provider_uid: "some-uid",

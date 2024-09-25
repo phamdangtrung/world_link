@@ -2,11 +2,11 @@ import Config
 
 # Configure your database
 config :world_link, WorldLink.Repo,
-  username: System.get_env("DB_USERNAME"),
-  password: System.get_env("DB_PASSWORD"),
-  hostname: System.get_env("DB_HOSTNAME"),
-  port: System.get_env("DB_PORT"),
-  database: System.get_env("DB_DATABASE"),
+  username: System.get_env("PGUSER"),
+  password: System.get_env("PGPASSWORD"),
+  hostname: System.get_env("PGHOST"),
+  port: System.get_env("PGPORT"),
+  database: System.get_env("PGDATABASE"),
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -31,7 +31,7 @@ config :world_link, WorldLinkWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: System.get_env("APP_SECRET"),
+  secret_key_base: System.get_env("SECRET_KEY_BASE"),
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},

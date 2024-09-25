@@ -32,11 +32,11 @@ COPY config ./config
 COPY lib ./lib
 COPY priv ./priv
 COPY test ./test
-COPY entrypoint.sh ./entrypoint.sh
+COPY entrypoint.dev.sh ./entrypoint.sh
 
 RUN mix do compile
 
 RUN chmod +x /app/entrypoint.sh
-ENV ENV="/etc/profile"
+# ENV ENV="/etc/profile"
 EXPOSE 4000
-ENTRYPOINT [ "/app/entrypoint.dev.sh" ]
+ENTRYPOINT [ "/app/entrypoint.sh" ]

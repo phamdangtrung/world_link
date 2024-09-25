@@ -6,11 +6,11 @@ import Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :world_link, WorldLink.Repo,
-  username: System.get_env("DB_USERNAME"),
-  password: System.get_env("DB_PASSWORD"),
-  hostname: System.get_env("DB_HOSTNAME"),
-  port: System.get_env("DB_PORT"),
-  database: System.get_env("DB_DATABASE_TEST"),
+  username: System.get_env("PGUSERNAME"),
+  password: System.get_env("PGPASSWORD"),
+  hostname: System.get_env("PGHOST"),
+  port: System.get_env("PGPORT"),
+  database: System.get_env("PG_DATABASE"),
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 
@@ -18,7 +18,7 @@ config :world_link, WorldLink.Repo,
 # you can enable the server option below.
 config :world_link, WorldLinkWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: System.get_env("APP_SECRET"),
+  secret_key_base: System.get_env("SECRET_KEY_BASE"),
   server: false
 
 # In test we don't send emails.

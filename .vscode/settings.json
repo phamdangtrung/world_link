@@ -5,6 +5,8 @@
     "database",
     "feature",
     "dependencies",
-    "image"
+    "image",
+    "version",
+    "docker"
   ]
 }

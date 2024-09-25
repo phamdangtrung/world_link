@@ -27,7 +27,7 @@ defmodule WorldLinkWeb do
         layouts: [html: WorldLinkWeb.Layouts]
 
       import Plug.Conn
-      import WorldLinkWeb.Gettext
+      use Gettext.Backend, otp_app: :world_link
       alias WorldLinkWeb.Router.Helpers, as: Routes
 
       unquote(verified_routes())
@@ -86,7 +86,7 @@ defmodule WorldLinkWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import WorldLinkWeb.Gettext
+      use Gettext.Backend, otp_app: :world_link
     end
   end
 
@@ -97,7 +97,7 @@ defmodule WorldLinkWeb do
 
       # Core UI components and translation
       import WorldLinkWeb.CoreComponents
-      import WorldLinkWeb.Gettext
+      use Gettext.Backend, otp_app: :world_link
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

@@ -49,7 +49,7 @@ if config_env() == :prod do
       """
 
   host = System.get_env("PHX_HOST") || "example.com"
-  port = String.to_integer(System.get_env("PORT") || "4000")
+  port = String.to_integer(System.get_env("APP_PORT") || "4000")
 
   config :world_link, WorldLinkWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],

@@ -17,7 +17,7 @@ defmodule WorldLinkWeb.CoreComponents do
   use Phoenix.Component
 
   alias Phoenix.LiveView.JS
-  import WorldLinkWeb.Gettext
+  use Gettext, backend: WorldLinkWeb.Gettext
 
   @doc """
   Renders a modal.
